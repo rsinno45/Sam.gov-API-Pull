@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="styles.css" />
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="Sam.js"></script>
+  </head>
+  <body>
+    <h1>SamGov API Data</h1>
+    <label for="legalBusinessName">Enter City Name:</label>
+    <input type="text" id="physicalAddressCity" placeholder="e.g., Boeing" />
+
+    <label for="">Choose Socio Economic Designations:</label>
+    <select id="socioEconomicDesignations">
+      <option value="27">SDB</option>
+      <option value="8W">WOSB</option>
+      <option value="QF">SDVOB</option>
+      <option value="A5">VOB</option>
+      <option value="23">Minority Owned</option>
+    </select>
+
+    <button id="fetchDataButton" onclick="fetchData()">Request a CSV</button>
+    <h3 id="output"></h3>
+    <!-- This will show the API response -->
+  </body>
+</html>

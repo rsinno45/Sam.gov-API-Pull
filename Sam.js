@@ -9,6 +9,13 @@ class SamGovAPI {
     params.api_key = this.apiKey;
     params.samRegistered = "Yes";
     params.format = "csv"; // Request CSV format
+    const response = await axios.get(SamGovAPI.BASE_URL, { params });
+    return this._handleResponse(response);
+  }
+
+  async getPublicDataJson(params = {}) {
+    params.api_key = this.apiKey;
+    params.samRegistered = "Yes";
 
     const response = await axios.get(SamGovAPI.BASE_URL, { params });
     return this._handleResponse(response);
@@ -51,9 +58,21 @@ async function fetchData() {
     return; // Exit the function if validation fails
   }
 
+  const primaryNaics = document.getElementById("primaryNaics").value.trim(); // Get input value and trim whitespace
+  console.log(businessTypeCode);
+
+  // Validate the input
+  if (!validateInput(businessTypeCode)) {
+    document.getElementById("output").textContent =
+      "Please enter a valid code.";
+    return; // Exit the function if validation fails
+  }
+
   const socioEconomicParams = {
     businessTypeCode: businessTypeCode, // Keep this if you need it, or adjust as necessary
     physicalAddressCity: physicalAddressCity, // Use the input value
+    primaryNaics: primaryNaics, // Use the input value
+    registrationStatus: "A", // Default
   };
 
   try {
@@ -75,7 +94,7 @@ async function fetchData() {
       // **NEW CODE**: Create a formatted output without the initial phrase
       const outputHtml = `
         
-        <a id="output-style" href="${downloadUrl}" target="_blank">Click Here To Download CSV</a>
+        <a id="output-style" href="${downloadUrl}" target="_blank">Click Here To Download CSV ${businessTypeCode}</a>
       `;
 
       document.getElementById("output").innerHTML = outputHtml; // Use innerHTML to render HTML
@@ -89,11 +108,165 @@ async function fetchData() {
   }
 }
 
+async function fetchDataJson() {
+  const apiKey = "4tzWNeSeCYFZVbsDTPQRKD9skFpJ92tqIDsnPrle";
+  const samApi = new SamGovAPI(apiKey);
+
+  const physicalAddressCity = document
+    .getElementById("physicalAddressCity")
+    .value.trim();
+  const businessTypeCode = document
+    .getElementById("socioEconomicDesignations")
+    .value.trim();
+  const primaryNaics = document.getElementById("primaryNaics").value.trim();
+
+  if (!validateInput(businessTypeCode)) {
+    document.getElementById("output").textContent =
+      "Please enter valid inputs.";
+    return;
+  }
+
+  const socioEconomicParams = {
+    businessTypeCode,
+    primaryNaics,
+    registrationStatus: "A",
+  };
+
+  try {
+    const response = await samApi.getPublicDataJson(socioEconomicParams);
+    console.log(response);
+
+    const topResults = response.entityData;
+    console.log(response.entityData);
+
+    renderResults(topResults);
+  } catch (error) {
+    console.error("API Error:", error);
+    document.getElementById("output").textContent = `Error: ${error.message}`;
+  }
+}
+
+function renderResults(topResults) {
+  const outputElement = document.getElementById("output");
+  outputElement.innerHTML = "";
+
+  topResults.forEach((entity, index) => {
+    const pointsOfContact = entity.pointsOfContact || {};
+    const coreData = entity.coreData || {};
+    const assertions = entity.assertions || {};
+    const entityRegistration = entity.entityRegistration || {};
+    const financialInformation = coreData.financialInformation || {};
+    const governmentBusinessPOC = pointsOfContact.governmentBusinessPOC || {};
+    const entityInformation = coreData.entityInformation || {};
+    const physicalAddress = coreData.physicalAddress || {};
+    const generalInformation = coreData.generalInformation || {};
+    const disasterReliefData = assertions.disasterReliefData || {};
+    const goodsAndServices = assertions.goodsAndServices || {};
+
+    if (!entityInformation.entityURL) return;
+
+    const fields = [
+      { label: "First Name", value: governmentBusinessPOC.firstName },
+      { label: "Last Name", value: governmentBusinessPOC.lastName },
+      {
+        label: "Legal Business Name",
+        value: entityRegistration.legalBusinessName,
+      },
+      { label: "DBA", value: entityRegistration.dbaName },
+      { label: "Primary NAICS", value: goodsAndServices.primaryNaics },
+      {
+        label: "Entity Structure Code",
+        value: generalInformation.entityStructureCode,
+      },
+      {
+        label: "Profit Structure Code",
+        value: generalInformation.profitStructureCode,
+      },
+      {
+        label: "Disaster Registry",
+        value: disasterReliefData.disasterRegistryFlag,
+      },
+      {
+        label: "Bonding",
+        value: disasterReliefData.bondingFlag,
+      },
+      {
+        label: "Credit Card Usage",
+        value: financialInformation.creditCardUsage,
+      },
+      {
+        label: "Registration Date",
+        value: entityRegistration.registrationDate,
+      },
+      { label: "UEI", value: entityRegistration.ueiSAM },
+      { label: "Cage Code", value: entityRegistration.cageCode },
+      {
+        label: "Purpose of Registration",
+        value: entityRegistration.purposeOfRegistrationDesc,
+      },
+      {
+        label: "Registration Status",
+        value: entityRegistration.registrationStatus,
+      },
+      { label: "Last Update", value: entityRegistration.lastUpdateDate },
+      {
+        label: "Registration Expiration Date",
+        value: entityRegistration.registrationExpirationDate,
+      },
+      {
+        label: "Entity Start Date",
+        value: entityInformation.entityStartDate,
+      },
+      {
+        label: "Submission Date",
+        value: entityInformation.submissionDate,
+      },
+      {
+        label: "Congressional District",
+        value: coreData.congressionalDistrict,
+      },
+      {
+        label: "Address",
+        value:
+          physicalAddress.addressLine1 +
+          ", " +
+          physicalAddress.city +
+          ", " +
+          physicalAddress.stateOrProvinceCode +
+          " " +
+          physicalAddress.zipCode,
+      },
+      { label: "Website", value: entityInformation.entityURL, isLink: true },
+      {
+        label: "NAICS List",
+        value: goodsAndServices.naicsList
+          .map((item) => item.naicsCode)
+          .join(", "),
+      },
+    ];
+
+    const fieldsHtml = fields
+      .filter((field) => field.value)
+      .map((field) => {
+        const value = field.isLink
+          ? `<a href="${field.value}" target="_blank">${field.value}</a>`
+          : field.value;
+        return `<p><strong>${field.label}:</strong> ${value}</p>`;
+      })
+      .join("");
+
+    const result = `
+      <div class="result-card">
+        <h4>Result #${index + 1}</h4>
+        ${fieldsHtml}
+      </div>
+    `;
+    outputElement.innerHTML += result;
+  });
+}
+
 // Validation function
 function validateInput(input) {
   // Check if the input is not empty and is a valid string (you can add more checks if needed)
   return input.length > 0;
 }
-
-// Attach event listener to button
-document.getElementById("fetchDataButton").onclick = fetchData; // Call fetchData when button is clicked

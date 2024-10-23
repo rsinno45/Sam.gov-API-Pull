@@ -8,14 +8,19 @@
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="Sam.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
   </head>
   <body>
     <h1>SamGov API Data</h1>
     <label for="legalBusinessName">Enter City Name:</label>
-    <input type="text" id="physicalAddressCity" placeholder="e.g., Boeing" />
+    <input type="text" id="physicalAddressCity" placeholder="e.g., Chicago" />
+
+    <label for="primaryNaics">Primary NACIS Code:</label>
+    <input type="text" id="primaryNaics" placeholder="541444" />
 
     <label for="">Choose Socio Economic Designations:</label>
     <select id="socioEconomicDesignations">
+      <option value="">None</option>
       <option value="27">SDB</option>
       <option value="8W">WOSB</option>
       <option value="QF">SDVOB</option>
@@ -23,7 +28,10 @@
       <option value="23">Minority Owned</option>
     </select>
 
-    <button id="fetchDataButton" onclick="fetchData()">Request a CSV</button>
+    <!-- <button id="fetchDataButton" onclick="fetchDataJson()">
+      Check Entities
+    </button> -->
+    <button id="download-csv" onclick="fetchData()">Request a CSV</button>
     <h3 id="output"></h3>
     <!-- This will show the API response -->
   </body>

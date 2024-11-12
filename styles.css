@@ -138,3 +138,18 @@ button:active,
     width: 100%;
   }
 }
+
+.checkbox-container {
+  margin: 10px 0;
+}
+
+.checkbox-container label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
+.checkbox-container input[type="checkbox"] {
+  cursor: pointer;
+}

@@ -30,74 +30,60 @@ class SamGovAPI {
   }
 }
 
-// Usage
 async function fetchData() {
-  const apiKey = "4tzWNeSeCYFZVbsDTPQRKD9skFpJ92tqIDsnPrle"; // Your actual API key
+  const apiKey = "4tzWNeSeCYFZVbsDTPQRKD9skFpJ92tqIDsnPrle";
   const samApi = new SamGovAPI(apiKey);
 
   const physicalAddressCity = document
     .getElementById("physicalAddressCity")
-    .value.trim(); // Get input value and trim whitespace
+    .value.trim();
 
-  // Validate the input
   if (!validateInput(physicalAddressCity)) {
     document.getElementById("output").textContent =
       "Please enter a valid city.";
-    return; // Exit the function if validation fails
+    return;
   }
 
   const businessTypeCode = document
     .getElementById("socioEconomicDesignations")
-    .value.trim(); // Get input value and trim whitespace
-  console.log(businessTypeCode);
+    .value.trim();
 
-  // Validate the input
-  if (!validateInput(businessTypeCode)) {
-    document.getElementById("output").textContent =
-      "Please enter a valid designation.";
-    return; // Exit the function if validation fails
-  }
+  const sbaBusinessTypeCode = document
+    .getElementById("sbaBusinessTypeCode")
+    .value.trim();
 
-  const primaryNaics = document.getElementById("primaryNaics").value.trim(); // Get input value and trim whitespace
-  console.log(businessTypeCode);
-
-  // Validate the input
-  if (!validateInput(businessTypeCode)) {
-    document.getElementById("output").textContent =
-      "Please enter a valid code.";
-    return; // Exit the function if validation fails
-  }
+  const physicalAddressProvinceOrStateCode = document
+    .getElementById("physicalAddressProvinceOrStateCode")
+    .value.trim();
 
   const socioEconomicParams = {
-    businessTypeCode: businessTypeCode, // Keep this if you need it, or adjust as necessary
-    physicalAddressCity: physicalAddressCity, // Use the input value
-    primaryNaics: primaryNaics, // Use the input value
-    registrationStatus: "A", // Default
+    businessTypeCode: businessTypeCode,
+    physicalAddressCity: physicalAddressCity,
+    physicalAddressProvinceOrStateCode: physicalAddressProvinceOrStateCode,
+    sbaBusinessTypeCode: sbaBusinessTypeCode,
+    registrationStatus: "A",
   };
 
   try {
-    const response = await samApi.getPublicData(socioEconomicParams); // Get the response
+    const response = await samApi.getPublicData(socioEconomicParams);
     const downloadUrl = response
-      .replace("REPLACE_WITH_API_KEY", apiKey) // Replace the placeholder with the actual API key
-      .replace("Extract File will be available for download with url: ", "") // Remove the unwanted phrase
+      .replace("REPLACE_WITH_API_KEY", apiKey)
+      .replace("Extract File will be available for download with url: ", "")
       .replace(
         "in some time. If you have requested for an email notification, you will receive it once the file is ready for download.",
         ""
-      ); // Remove the unwanted phrase
+      );
 
-    // **NEW CODE**: Split the URL into two parts
     const tokenIndex = downloadUrl.indexOf("token=");
     if (tokenIndex !== -1) {
-      const firstPart = downloadUrl.substring(0, tokenIndex + 6); // Include "token="
-      const secondPart = downloadUrl.substring(tokenIndex + 6); // Everything after the token value
+      const firstPart = downloadUrl.substring(0, tokenIndex + 6);
+      const secondPart = downloadUrl.substring(tokenIndex + 6);
 
-      // **NEW CODE**: Create a formatted output without the initial phrase
       const outputHtml = `
-        
         <a id="output-style" href="${downloadUrl}" target="_blank">Click Here To Download CSV ${businessTypeCode}</a>
       `;
 
-      document.getElementById("output").innerHTML = outputHtml; // Use innerHTML to render HTML
+      document.getElementById("output").innerHTML = outputHtml;
     } else {
       document.getElementById("output").textContent =
         "Token not found in the URL.";
@@ -107,7 +93,6 @@ async function fetchData() {
     document.getElementById("output").textContent = `Error: ${error.message}`;
   }
 }
-
 async function fetchDataJson() {
   const apiKey = "4tzWNeSeCYFZVbsDTPQRKD9skFpJ92tqIDsnPrle";
   const samApi = new SamGovAPI(apiKey);

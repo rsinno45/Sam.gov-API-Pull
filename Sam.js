@@ -255,3 +255,5 @@ function validateInput(input) {
   // Check if the input is not empty and is a valid string (you can add more checks if needed)
   return input.length > 0;
 }
+
+// Check if the input is not empty and is a valid string (you can add more checks if needed)

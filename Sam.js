@@ -8,7 +8,7 @@ class SamGovAPI {
   async getPublicData(params = {}) {
     params.api_key = this.apiKey;
     params.samRegistered = "Yes";
-    params.format = "csv"; // Request CSV format
+    params.format = "csv";
     const response = await axios.get(SamGovAPI.BASE_URL, { params });
     return this._handleResponse(response);
   }
@@ -16,33 +16,27 @@ class SamGovAPI {
   async getPublicDataJson(params = {}) {
     params.api_key = this.apiKey;
     params.samRegistered = "Yes";
-
     const response = await axios.get(SamGovAPI.BASE_URL, { params });
     return this._handleResponse(response);
   }
 
   _handleResponse(response) {
     if (response.status === 200) {
-      return response.data; // Return CSV content as text
+      return response.data;
     } else {
       throw new Error(`Error: ${response.status} - ${response.data}`);
     }
   }
 }
 
+let currentPage = 1;
+const resultsPerPage = 100;
+let allResults = [];
+let displayedCageCodes = new Set();
+
 async function fetchData() {
   const apiKey = "4tzWNeSeCYFZVbsDTPQRKD9skFpJ92tqIDsnPrle";
   const samApi = new SamGovAPI(apiKey);
-
-  const physicalAddressCity = document
-    .getElementById("physicalAddressCity")
-    .value.trim();
-
-  if (!validateInput(physicalAddressCity)) {
-    document.getElementById("output").textContent =
-      "Please enter a valid city.";
-    return;
-  }
 
   const businessTypeCode = document
     .getElementById("socioEconomicDesignations")
@@ -58,7 +52,6 @@ async function fetchData() {
 
   const socioEconomicParams = {
     businessTypeCode: businessTypeCode,
-    physicalAddressCity: physicalAddressCity,
     physicalAddressProvinceOrStateCode: physicalAddressProvinceOrStateCode,
     sbaBusinessTypeCode: sbaBusinessTypeCode,
     registrationStatus: "A",
@@ -93,49 +86,92 @@ async function fetchData() {
     document.getElementById("output").textContent = `Error: ${error.message}`;
   }
 }
-async function fetchDataJson() {
+async function fetchDataJson(resetResults = false) {
   const apiKey = "4tzWNeSeCYFZVbsDTPQRKD9skFpJ92tqIDsnPrle";
   const samApi = new SamGovAPI(apiKey);
 
-  const physicalAddressCity = document
-    .getElementById("physicalAddressCity")
-    .value.trim();
+  if (resetResults) {
+    currentPage = 1;
+    document.getElementById("output").innerHTML = "";
+  }
+
+  const loadingDiv = document.getElementById("loading");
+  if (loadingDiv) loadingDiv.style.display = "block";
+
   const businessTypeCode = document
     .getElementById("socioEconomicDesignations")
     .value.trim();
-  const primaryNaics = document.getElementById("primaryNaics").value.trim();
 
-  if (!validateInput(businessTypeCode)) {
-    document.getElementById("output").textContent =
-      "Please enter valid inputs.";
-    return;
-  }
+  const sbaBusinessTypeCode = document
+    .getElementById("sbaBusinessTypeCode")
+    .value.trim();
+
+  const physicalAddressProvinceOrStateCode = document
+    .getElementById("physicalAddressProvinceOrStateCode")
+    .value.trim();
 
   const socioEconomicParams = {
-    businessTypeCode,
-    primaryNaics,
+    businessTypeCode: businessTypeCode,
+    physicalAddressProvinceOrStateCode: physicalAddressProvinceOrStateCode,
+    sbaBusinessTypeCode: sbaBusinessTypeCode,
     registrationStatus: "A",
   };
 
   try {
     const response = await samApi.getPublicDataJson(socioEconomicParams);
-    console.log(response);
+    console.log("API Response:", response);
 
-    const topResults = response.entityData;
-    console.log(response.entityData);
+    if (response.entityData && response.entityData.length > 0) {
+      const totalResults = response.totalRecords || 0;
 
-    renderResults(topResults);
+      // Update total count display
+      document.getElementById("total-count").textContent = `Showing ${Math.min(
+        currentPage * resultsPerPage,
+        totalResults
+      )} of ${totalResults} results`;
+
+      // Show/hide load more button based on whether there are more results
+      if (totalResults > currentPage * resultsPerPage) {
+        document.getElementById("load-more").style.display = "block";
+      } else {
+        document.getElementById("load-more").style.display = "none";
+      }
+
+      // Render the results
+      renderResults(response.entityData, !resetResults);
+    } else {
+      document.getElementById("output").innerHTML = "<p>No results found</p>";
+      document.getElementById("load-more").style.display = "none";
+    }
+
+    if (loadingDiv) loadingDiv.style.display = "none";
   } catch (error) {
     console.error("API Error:", error);
     document.getElementById("output").textContent = `Error: ${error.message}`;
+    if (loadingDiv) loadingDiv.style.display = "none";
   }
 }
 
-function renderResults(topResults) {
-  const outputElement = document.getElementById("output");
-  outputElement.innerHTML = "";
+window.loadMore = async function () {
+  currentPage++;
+  await fetchDataJson(false);
+};
 
-  topResults.forEach((entity, index) => {
+function renderResults(results, append = false) {
+  const outputElement = document.getElementById("output");
+
+  if (!append) {
+    outputElement.innerHTML = "";
+  }
+
+  if (!results || !Array.isArray(results)) {
+    if (!append) {
+      outputElement.innerHTML = "<p>No results found</p>";
+    }
+    return;
+  }
+
+  results.forEach((entity, index) => {
     const pointsOfContact = entity.pointsOfContact || {};
     const coreData = entity.coreData || {};
     const assertions = entity.assertions || {};
@@ -148,8 +184,7 @@ function renderResults(topResults) {
     const disasterReliefData = assertions.disasterReliefData || {};
     const goodsAndServices = assertions.goodsAndServices || {};
 
-    if (!entityInformation.entityURL) return;
-
+    // Your existing fields definition...
     const fields = [
       { label: "First Name", value: governmentBusinessPOC.firstName },
       { label: "Last Name", value: governmentBusinessPOC.lastName },
@@ -230,6 +265,9 @@ function renderResults(topResults) {
       },
     ];
 
+    const businessCard = document.createElement("div");
+    businessCard.className = "result-card";
+
     const fieldsHtml = fields
       .filter((field) => field.value)
       .map((field) => {
@@ -240,14 +278,17 @@ function renderResults(topResults) {
       })
       .join("");
 
-    const result = `
-      <div class="result-card">
-        <h4>Result #${index + 1}</h4>
-        ${fieldsHtml}
-      </div>
+    businessCard.innerHTML = `
+      <h4>Result #${index + 1}</h4>
+      ${fieldsHtml}
     `;
-    outputElement.innerHTML += result;
+
+    outputElement.appendChild(businessCard);
   });
+}
+
+function validateInput(input) {
+  return input.length > 0;
 }
 
 // Validation function

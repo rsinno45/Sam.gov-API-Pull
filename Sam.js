@@ -42,9 +42,12 @@ async function fetchData() {
     .getElementById("socioEconomicDesignations")
     .value.trim();
 
-  const sbaBusinessTypeCode = document
-    .getElementById("sbaBusinessTypeCode")
-    .value.trim();
+  const selectedCertifications = Array.from(
+    document.querySelectorAll('input[name="sbaBusinessTypeCode"]:checked')
+  )
+    .map((checkbox) => checkbox.value)
+    .filter(Boolean)
+    .join(" ");
 
   const physicalAddressProvinceOrStateCode = document
     .getElementById("physicalAddressProvinceOrStateCode")
@@ -53,7 +56,7 @@ async function fetchData() {
   const socioEconomicParams = {
     businessTypeCode: businessTypeCode,
     physicalAddressProvinceOrStateCode: physicalAddressProvinceOrStateCode,
-    sbaBusinessTypeCode: sbaBusinessTypeCode,
+    sbaBusinessTypeCode: selectedCertifications, // Use the collected values
     registrationStatus: "A",
   };
 
@@ -102,9 +105,12 @@ async function fetchDataJson(resetResults = false) {
     .getElementById("socioEconomicDesignations")
     .value.trim();
 
-  const sbaBusinessTypeCode = document
-    .getElementById("sbaBusinessTypeCode")
-    .value.trim();
+  const selectedCertifications = Array.from(
+    document.querySelectorAll('input[name="sbaBusinessTypeCode"]:checked')
+  )
+    .map((checkbox) => checkbox.value)
+    .filter(Boolean)
+    .join("~");
 
   const physicalAddressProvinceOrStateCode = document
     .getElementById("physicalAddressProvinceOrStateCode")
@@ -113,7 +119,7 @@ async function fetchDataJson(resetResults = false) {
   const socioEconomicParams = {
     businessTypeCode: businessTypeCode,
     physicalAddressProvinceOrStateCode: physicalAddressProvinceOrStateCode,
-    sbaBusinessTypeCode: sbaBusinessTypeCode,
+    sbaBusinessTypeCode: selectedCertifications, // Use the collected values
     registrationStatus: "A",
   };
 
@@ -194,15 +200,10 @@ function renderResults(results, append = false) {
       },
       { label: "DBA", value: entityRegistration.dbaName },
       { label: "Primary NAICS", value: goodsAndServices.primaryNaics },
-      {
-        label: "Entity Structure Code",
-        value: generalInformation.entityStructureCode,
-      },
-      {
-        label: "Profit Structure Code",
-        value: generalInformation.profitStructureCode,
-      },
-      {
+
+      { label: "UEI", value: entityRegistration.ueiSAM },
+      { label: "Cage Code", value: entityRegistration.cageCode } /*,
+           {
         label: "Disaster Registry",
         value: disasterReliefData.disasterRegistryFlag,
       },
@@ -218,11 +219,17 @@ function renderResults(results, append = false) {
         label: "Registration Date",
         value: entityRegistration.registrationDate,
       },
-      { label: "UEI", value: entityRegistration.ueiSAM },
-      { label: "Cage Code", value: entityRegistration.cageCode },
       {
         label: "Purpose of Registration",
         value: entityRegistration.purposeOfRegistrationDesc,
+      },
+       {
+        label: "Entity Structure Code",
+        value: generalInformation.entityStructureCode,
+      },
+      {
+        label: "Profit Structure Code",
+        value: generalInformation.profitStructureCode,
       },
       {
         label: "Registration Status",
@@ -244,7 +251,7 @@ function renderResults(results, append = false) {
       {
         label: "Congressional District",
         value: coreData.congressionalDistrict,
-      },
+      }*/,
       {
         label: "Address",
         value:

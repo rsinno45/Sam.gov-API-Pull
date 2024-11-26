@@ -270,11 +270,21 @@
         </div>
 
         <div class="form-group">
-          <label for="sbaBusinessTypeCode">HUBZone Certified:</label>
-          <select id="sbaBusinessTypeCode">
-            <option value="">No</option>
-            <option value="XX">Yes</option>
-          </select>
+          <label for="sbaBusinessTypeCode">Certifications:</label>
+          <div class="checkbox-group" id="sbaBusinessTypeCode">
+            <label class="checkbox-item">
+              <input type="checkbox" name="sbaBusinessTypeCode" value="A6" />
+              8(a) Program
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" name="sbaBusinessTypeCode" value="XX" />
+              HUBZone
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" name="sbaBusinessTypeCode" value="JT" />
+              8(a) Joint Venture
+            </label>
+          </div>
         </div>
 
         <div class="button-group">

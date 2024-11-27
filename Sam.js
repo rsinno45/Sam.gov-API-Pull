@@ -101,10 +101,6 @@ async function fetchDataJson(resetResults = false) {
   const loadingDiv = document.getElementById("loading");
   if (loadingDiv) loadingDiv.style.display = "block";
 
-  const businessTypeCode = document
-    .getElementById("socioEconomicDesignations")
-    .value.trim();
-
   const selectedCertifications = Array.from(
     document.querySelectorAll('input[name="sbaBusinessTypeCode"]:checked')
   )
@@ -117,7 +113,7 @@ async function fetchDataJson(resetResults = false) {
     .value.trim();
 
   const socioEconomicParams = {
-    businessTypeCode: businessTypeCode,
+    // businessTypeCode: businessTypeCode,
     physicalAddressProvinceOrStateCode: physicalAddressProvinceOrStateCode,
     sbaBusinessTypeCode: selectedCertifications, // Use the collected values
     registrationStatus: "A",
@@ -140,7 +136,7 @@ async function fetchDataJson(resetResults = false) {
       if (totalResults > currentPage * resultsPerPage) {
         document.getElementById("load-more").style.display = "block";
       } else {
-        document.getElementById("load-more").style.display = "none";
+        document.getElementById("load-more").style.display = "block";
       }
 
       // Render the results

@@ -90,9 +90,6 @@ async function fetchData() {
   }
 }
 async function fetchDataJson(resetResults = false) {
-  const apiKey = "4tzWNeSeCYFZVbsDTPQRKD9skFpJ92tqIDsnPrle";
-  const samApi = new SamGovAPI(apiKey);
-
   if (resetResults) {
     currentPage = 1;
     document.getElementById("output").innerHTML = "";
@@ -101,63 +98,73 @@ async function fetchDataJson(resetResults = false) {
   const loadingDiv = document.getElementById("loading");
   if (loadingDiv) loadingDiv.style.display = "block";
 
-  const selectedCertifications = Array.from(
-    document.querySelectorAll('input[name="sbaBusinessTypeCode"]:checked')
-  )
-    .map((checkbox) => checkbox.value)
-    .filter(Boolean)
-    .join("~");
-
-  const physicalAddressProvinceOrStateCode = document
-    .getElementById("physicalAddressProvinceOrStateCode")
-    .value.trim();
-
-  const socioEconomicParams = {
-    // businessTypeCode: businessTypeCode,
-    physicalAddressProvinceOrStateCode: physicalAddressProvinceOrStateCode,
-    sbaBusinessTypeCode: selectedCertifications, // Use the collected values
-    registrationStatus: "A",
-  };
-
   try {
-    const response = await samApi.getPublicDataJson(socioEconomicParams);
-    console.log("API Response:", response);
+    // Get selected certifications and business types
+    const selectedCertifications = Array.from(
+      document.querySelectorAll('input[name="sbaBusinessTypeCode"]:checked')
+    )
+      .map((checkbox) => checkbox.value)
+      .filter(Boolean)
+      .join("~");
 
-    if (response.entityData && response.entityData.length > 0) {
-      const totalResults = response.totalRecords || 0;
+    const businessTypeCode = Array.from(
+      document.querySelectorAll('input[name="businessTypeCode"]:checked')
+    )
+      .map((checkbox) => checkbox.value)
+      .filter(Boolean)
+      .join("~");
 
-      // Update total count display
+    const state = document
+      .getElementById("physicalAddressProvinceOrStateCode")
+      .value.trim();
+
+    // Call Flask endpoint with search parameters
+    const response = await fetch("http://localhost:5001/process-sam-data", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      mode: "cors", // Add this line
+      body: JSON.stringify({
+        sbaBusinessTypeCode: selectedCertifications,
+        businessTypeCode: businessTypeCode,
+        physicalAddressProvinceOrStateCode: state,
+        registrationStatus: "A",
+      }),
+    });
+
+    const data = await response.json();
+
+    if (data.error) {
+      throw new Error(data.error);
+    }
+
+    // Handle the combined results
+    if (data.entityData && data.entityData.length > 0) {
       document.getElementById("total-count").textContent = `Showing ${Math.min(
         currentPage * resultsPerPage,
-        totalResults
-      )} of ${totalResults} results`;
+        data.totalRecords
+      )} of ${data.totalRecords} results`;
 
-      // Show/hide load more button based on whether there are more results
-      if (totalResults > currentPage * resultsPerPage) {
+      if (data.totalRecords > currentPage * resultsPerPage) {
         document.getElementById("load-more").style.display = "block";
       } else {
-        document.getElementById("load-more").style.display = "block";
+        document.getElementById("load-more").style.display = "none";
       }
 
-      // Render the results
-      renderResults(response.entityData, !resetResults);
+      renderResults(data.entityData, !resetResults);
     } else {
       document.getElementById("output").innerHTML = "<p>No results found</p>";
       document.getElementById("load-more").style.display = "none";
     }
-
-    if (loadingDiv) loadingDiv.style.display = "none";
   } catch (error) {
     console.error("API Error:", error);
     document.getElementById("output").textContent = `Error: ${error.message}`;
+  } finally {
     if (loadingDiv) loadingDiv.style.display = "none";
   }
 }
-
-window.loadMore = async function () {
-  currentPage++;
-  await fetchDataJson(false);
-};
 
 function renderResults(results, append = false) {
   const outputElement = document.getElementById("output");
@@ -174,97 +181,55 @@ function renderResults(results, append = false) {
   }
 
   results.forEach((entity, index) => {
-    const pointsOfContact = entity.pointsOfContact || {};
-    const coreData = entity.coreData || {};
-    const assertions = entity.assertions || {};
-    const entityRegistration = entity.entityRegistration || {};
-    const financialInformation = coreData.financialInformation || {};
-    const governmentBusinessPOC = pointsOfContact.governmentBusinessPOC || {};
-    const entityInformation = coreData.entityInformation || {};
-    const physicalAddress = coreData.physicalAddress || {};
-    const generalInformation = coreData.generalInformation || {};
-    const disasterReliefData = assertions.disasterReliefData || {};
-    const goodsAndServices = assertions.goodsAndServices || {};
-
-    // Your existing fields definition...
+    // Define fields based on the CSV structure
     const fields = [
-      { label: "First Name", value: governmentBusinessPOC.firstName },
-      { label: "Last Name", value: governmentBusinessPOC.lastName },
+      {
+        label: "First Name",
+        value: entity["governmentBusinessPOC.firstName"],
+      },
+      {
+        label: "Last Name",
+        value: entity["governmentBusinessPOC.lastName"],
+      },
       {
         label: "Legal Business Name",
-        value: entityRegistration.legalBusinessName,
-      },
-      { label: "DBA", value: entityRegistration.dbaName },
-      { label: "Primary NAICS", value: goodsAndServices.primaryNaics },
-
-      { label: "UEI", value: entityRegistration.ueiSAM },
-      { label: "Cage Code", value: entityRegistration.cageCode } /*,
-           {
-        label: "Disaster Registry",
-        value: disasterReliefData.disasterRegistryFlag,
+        value: entity.legalBusinessName,
       },
       {
-        label: "Bonding",
-        value: disasterReliefData.bondingFlag,
+        label: "DBA",
+        value: entity.dbaName,
       },
       {
-        label: "Credit Card Usage",
-        value: financialInformation.creditCardUsage,
+        label: "Primary NAICS",
+        value: entity["assertions.primaryNaics"],
       },
       {
-        label: "Registration Date",
-        value: entityRegistration.registrationDate,
+        label: "UEI",
+        value: entity.ueiSAM,
       },
       {
-        label: "Purpose of Registration",
-        value: entityRegistration.purposeOfRegistrationDesc,
+        label: "Cage Code",
+        value: entity.cageCode,
       },
-       {
-        label: "Entity Structure Code",
-        value: generalInformation.entityStructureCode,
-      },
-      {
-        label: "Profit Structure Code",
-        value: generalInformation.profitStructureCode,
-      },
-      {
-        label: "Registration Status",
-        value: entityRegistration.registrationStatus,
-      },
-      { label: "Last Update", value: entityRegistration.lastUpdateDate },
-      {
-        label: "Registration Expiration Date",
-        value: entityRegistration.registrationExpirationDate,
-      },
-      {
-        label: "Entity Start Date",
-        value: entityInformation.entityStartDate,
-      },
-      {
-        label: "Submission Date",
-        value: entityInformation.submissionDate,
-      },
-      {
-        label: "Congressional District",
-        value: coreData.congressionalDistrict,
-      }*/,
       {
         label: "Address",
-        value:
-          physicalAddress.addressLine1 +
-          ", " +
-          physicalAddress.city +
-          ", " +
-          physicalAddress.stateOrProvinceCode +
-          " " +
-          physicalAddress.zipCode,
+        value: [
+          entity["physicalAddress.addressLine1"],
+          entity["physicalAddress.city"],
+          entity["physicalAddress.stateOrProvinceCode"],
+          entity["physicalAddress.zipCode"],
+        ]
+          .filter(Boolean)
+          .join(", "),
       },
-      { label: "Website", value: entityInformation.entityURL, isLink: true },
+      {
+        label: "Website",
+        value: entity.entityURL,
+        isLink: true,
+      },
       {
         label: "NAICS List",
-        value: goodsAndServices.naicsList
-          .map((item) => item.naicsCode)
-          .join(", "),
+        value: entity["assertions.naicsCode"],
       },
     ];
 

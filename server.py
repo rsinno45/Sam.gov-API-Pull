@@ -37,6 +37,12 @@ def process_sam_data():
         params = request.json
         print("Received parameters:", params)
         
+        # Convert the ~ to & for AND logic
+        if params.get('businessTypeCode'):
+            params['businessTypeCode'] = '&'.join(params['businessTypeCode'].split('~'))
+        if params.get('sbaBusinessTypeCode'):
+            params['sbaBusinessTypeCode'] = '&'.join(params['sbaBusinessTypeCode'].split('~'))
+            
         json_data = processor.download_and_process(params)
         response = make_response(jsonify(json_data))
         response.headers.add("Access-Control-Allow-Origin", "https://samapipull.netlify.app")

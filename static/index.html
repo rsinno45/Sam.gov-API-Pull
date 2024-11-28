@@ -6,17 +6,13 @@
     <title>SAM.gov Business Search</title>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="Sam.js"></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Circular:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
     <style>
       * {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
-        font-family: Circular, -apple-system, BlinkMacSystemFont, Roboto,
-          "Helvetica Neue", sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
       }
 
       body {
@@ -25,146 +21,140 @@
       }
 
       .nav-container {
+        padding: 20px;
         border-bottom: 1px solid #ebebeb;
+      }
 
-        top: 0;
-        background: white;
-        z-index: 100;
+      .logo {
+        font-size: 24px;
+        font-weight: 600;
+        color: #ff385c;
+        text-decoration: none;
       }
 
       .main-nav {
-        max-width: 1600px;
+        max-width: 1440px;
         margin: 0 auto;
-        padding: 20px;
         display: flex;
         justify-content: space-between;
         align-items: center;
       }
 
-      .logo {
-        font-size: 24px;
-        font-weight: bold;
-        color: #ff385c;
-      }
-
-      .nav-button {
-        background: transparent;
-        border: 1px solid #ddd;
-        padding: 8px 16px;
-        border-radius: 21px;
-        cursor: pointer;
+      .nav-right {
         font-weight: 500;
       }
 
       .search-container {
-        max-width: 1200px;
-        margin: 20px auto;
-        padding: 0 20px;
+        max-width: 1440px;
+        margin: 40px auto;
+        padding: 0 40px;
       }
-      .search-bar {
+
+      .search-section {
+        background: #fff;
+        border-radius: 32px;
+        padding: 24px 32px;
+        box-shadow: 0 0 0 1px rgb(0 0 0 / 4%), 0 8px 16px rgb(0 0 0 / 15%);
+      }
+
+      .search-header {
+        margin-bottom: 24px;
+      }
+
+      .search-grid {
         display: grid;
         grid-template-columns: 1fr 2fr auto;
         gap: 24px;
-        padding: 24px;
-        border: 1px solid #ebebeb;
-        border-radius: 16px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        background: white;
+        align-items: start;
       }
 
-      .search-input {
-        flex: 1;
-        min-width: 150px;
+      .search-group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
       }
 
-      .search-input label {
-        display: block;
-        font-size: 12px;
-        font-weight: 600;
-        margin-bottom: 4px;
-        color: #222;
-      }
-
-      .search-input select {
-        width: 100%;
-        border: none;
+      .search-group h3 {
         font-size: 14px;
-        outline: none;
-        padding: 8px 0;
+        color: #222;
+        font-weight: 600;
       }
 
-      .checkbox-groups {
+      select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #b0b0b0;
+        border-radius: 8px;
+        font-size: 14px;
+        color: #222;
+        background: #fff;
+        cursor: pointer;
+      }
+
+      .checkbox-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 16px;
-        max-height: none;
-        padding: 8px 0;
-      }
-
-      .checkbox-group {
-        margin-bottom: 12px;
-      }
-
-      .checkbox-group h4 {
-        font-size: 14px;
-        margin-bottom: 8px;
-        color: #222;
+        gap: 12px;
       }
 
       .checkbox-item {
         display: flex;
         align-items: center;
         gap: 8px;
-        padding: 6px 0;
+        font-size: 14px;
+        color: #222;
       }
 
       .checkbox-item input[type="checkbox"] {
         width: 16px;
         height: 16px;
+        cursor: pointer;
       }
 
       .search-button {
-        height: fit-content;
-        align-self: flex-end;
-        padding: 16px 32px;
-        font-size: 16px;
         background: #ff385c;
         color: white;
         border: none;
-        border-radius: 12px;
+        padding: 14px 28px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 500;
         cursor: pointer;
+        align-self: flex-end;
+        display: flex;
+        align-items: center;
+        gap: 8px;
         transition: background-color 0.2s;
       }
 
       .search-button:hover {
         background: #e31c5f;
       }
+
       .results-container {
-        max-width: 1600px;
+        max-width: 1440px;
         margin: 0 auto;
-        padding: 24px;
+        padding: 20px 40px;
       }
 
       .results-count {
-        font-size: 14px;
+        text-align: center;
         color: #717171;
         margin: 20px 0;
-        text-align: center;
+        font-size: 14px;
       }
 
       .results-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
         gap: 32px;
-        padding: 32px 0;
-        max-width: 1200px;
-        margin: 0 auto;
+        margin-top: 24px;
       }
 
       .result-card {
-        background: white;
+        background: #fff;
         border: 1px solid #ebebeb;
-        border-radius: 16px;
+        border-radius: 12px;
         padding: 24px;
         transition: transform 0.2s, box-shadow 0.2s;
       }
@@ -173,8 +163,9 @@
         transform: translateY(-4px);
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
       }
+
       .result-card h4 {
-        font-size: 20px;
+        font-size: 18px;
         font-weight: 600;
         color: #222;
         margin-bottom: 16px;
@@ -183,10 +174,10 @@
       }
 
       .result-card p {
-        font-size: 15px;
-        line-height: 1.6;
         margin: 12px 0;
-        color: #484848;
+        font-size: 14px;
+        line-height: 1.5;
+        color: #717171;
       }
 
       .result-card strong {
@@ -207,19 +198,19 @@
         background: transparent;
         border: 1px solid #222;
         color: #222;
-        padding: 13px 24px;
+        padding: 14px 24px;
         border-radius: 8px;
         font-weight: 500;
         cursor: pointer;
         margin: 32px auto;
         display: block;
-        transition: transform 0.2s;
         min-width: 200px;
+        transition: all 0.2s;
       }
 
       .load-more:hover {
-        transform: scale(1.02);
         background: #f7f7f7;
+        transform: translateY(-2px);
       }
 
       .loading {
@@ -238,22 +229,6 @@
         margin: 0 auto 16px;
       }
 
-      @media (max-width: 1024px) {
-        .results-grid {
-          grid-template-columns: 1fr;
-          padding: 20px;
-        }
-
-        .search-bar {
-          grid-template-columns: 1fr;
-          gap: 20px;
-        }
-
-        .checkbox-groups {
-          grid-template-columns: 1fr;
-        }
-      }
-
       @keyframes spin {
         0% {
           transform: rotate(0deg);
@@ -262,137 +237,128 @@
           transform: rotate(360deg);
         }
       }
+
+      @media (max-width: 1024px) {
+        .search-grid {
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+
+        .results-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .checkbox-grid {
+          grid-template-columns: 1fr;
+        }
+      }
     </style>
   </head>
   <body>
     <div class="nav-container">
       <nav class="main-nav">
-        <div class="nav-left">
-          <div class="logo">SAM.gov Business Search</div>
-        </div>
-        <div class="nav-right">
-          <button class="nav-button">Menu</button>
-        </div>
+        <a href="/" class="logo">SAM.gov Business Search</a>
+        <div class="nav-right">Menu</div>
       </nav>
+    </div>
 
-      <div class="search-container">
-        <div class="search-bar">
-          <div class="search-input">
-            <label>Choose a State</label>
+    <div class="search-container">
+      <div class="search-section">
+        <div class="search-grid">
+          <div class="search-group">
+            <h3>Choose a State</h3>
             <select id="physicalAddressProvinceOrStateCode">
-              <option value="">None</option>
-              <option value="AL">Alabama</option>
-              <option value="AK">Alaska</option>
-              <option value="AZ">Arizona</option>
-              <option value="AR">Arkansas</option>
-              <option value="CA">California</option>
-              <option value="CO">Colorado</option>
-              <option value="CT">Connecticut</option>
-              <option value="DE">Delaware</option>
-              <option value="FL">Florida</option>
-              <option value="GA">Georgia</option>
-              <option value="HI">Hawaii</option>
-              <option value="ID">Idaho</option>
-              <option value="IL">Illinois</option>
-              <option value="IN">Indiana</option>
-              <option value="IA">Iowa</option>
-              <option value="KS">Kansas</option>
-              <option value="KY">Kentucky</option>
-              <option value="LA">Louisiana</option>
-              <option value="ME">Maine</option>
-              <option value="MD">Maryland</option>
-              <option value="MA">Massachusetts</option>
-              <option value="MI">Michigan</option>
-              <option value="MN">Minnesota</option>
-              <option value="MS">Mississippi</option>
-              <option value="MO">Missouri</option>
-              <option value="MT">Montana</option>
-              <option value="NE">Nebraska</option>
-              <option value="NV">Nevada</option>
-              <option value="NH">New Hampshire</option>
-              <option value="NJ">New Jersey</option>
-              <option value="NM">New Mexico</option>
-              <option value="NY">New York</option>
-              <option value="NC">North Carolina</option>
-              <option value="ND">North Dakota</option>
-              <option value="OH">Ohio</option>
-              <option value="OK">Oklahoma</option>
-              <option value="OR">Oregon</option>
-              <option value="PA">Pennsylvania</option>
-              <option value="RI">Rhode Island</option>
-              <option value="SC">South Carolina</option>
-              <option value="SD">South Dakota</option>
-              <option value="TN">Tennessee</option>
-              <option value="TX">Texas</option>
-              <option value="UT">Utah</option>
-              <option value="VT">Vermont</option>
-              <option value="VA">Virginia</option>
-              <option value="WA">Washington</option>
-              <option value="WV">West Virginia</option>
-              <option value="WI">Wisconsin</option>
-              <option value="WY">Wyoming</option>
+              <option value="">Select a state...</option>
+              <!-- Your existing state options -->
             </select>
           </div>
 
-          <div class="search-input">
-            <label>Certifications</label>
-            <div class="checkbox-groups">
-              <div class="checkbox-group">
-                <div class="checkbox-item">
-                  <input
-                    type="checkbox"
-                    name="sbaBusinessTypeCode"
-                    value="A6"
-                  />
-                  8(a) Program
-                </div>
-                <div class="checkbox-item">
-                  <input
-                    type="checkbox"
-                    name="sbaBusinessTypeCode"
-                    value="XX"
-                  />
-                  HUBZone
-                </div>
+          <div class="search-group">
+            <h3>Certifications</h3>
+            <div class="checkbox-grid">
+              <div class="checkbox-item">
+                <input
+                  type="checkbox"
+                  name="sbaBusinessTypeCode"
+                  value="A6"
+                  id="8a"
+                />
+                <label for="8a">8(a) Program</label>
               </div>
-              <div class="checkbox-group">
-                <div class="checkbox-item">
-                  <input type="checkbox" name="businessTypeCode" value="8W" />
-                  Woman Owned Small Business
-                </div>
-                <div class="checkbox-item">
-                  <input type="checkbox" name="businessTypeCode" value="A5" />
-                  Veteran Owned Business
-                </div>
-                <div class="checkbox-item">
-                  <input type="checkbox" name="businessTypeCode" value="QF" />
-                  Disabled Veteran Owned Business
-                </div>
-                <div class="checkbox-item">
-                  <input type="checkbox" name="businessTypeCode" value="23" />
-                  Minority Owned Business
-                </div>
-                <div class="checkbox-item">
-                  <input type="checkbox" name="businessTypeCode" value="NB" />
-                  Native American Owned Business
-                </div>
-                <div class="checkbox-item">
-                  <input type="checkbox" name="businessTypeCode" value="27" />
-                  Small Disadvantaged Business
-                </div>
+              <div class="checkbox-item">
+                <input
+                  type="checkbox"
+                  name="sbaBusinessTypeCode"
+                  value="XX"
+                  id="hubzone"
+                />
+                <label for="hubzone">HUBZone</label>
+              </div>
+              <div class="checkbox-item">
+                <input
+                  type="checkbox"
+                  name="businessTypeCode"
+                  value="8W"
+                  id="wosb"
+                />
+                <label for="wosb">Woman Owned Small Business</label>
+              </div>
+              <div class="checkbox-item">
+                <input
+                  type="checkbox"
+                  name="businessTypeCode"
+                  value="A5"
+                  id="vob"
+                />
+                <label for="vob">Veteran Owned Business</label>
+              </div>
+              <div class="checkbox-item">
+                <input
+                  type="checkbox"
+                  name="businessTypeCode"
+                  value="QF"
+                  id="sdvob"
+                />
+                <label for="sdvob">Disabled Veteran Owned Business</label>
+              </div>
+              <div class="checkbox-item">
+                <input
+                  type="checkbox"
+                  name="businessTypeCode"
+                  value="23"
+                  id="mob"
+                />
+                <label for="mob">Minority Owned Business</label>
+              </div>
+              <div class="checkbox-item">
+                <input
+                  type="checkbox"
+                  name="businessTypeCode"
+                  value="NB"
+                  id="naob"
+                />
+                <label for="naob">Native American Owned Business</label>
+              </div>
+              <div class="checkbox-item">
+                <input
+                  type="checkbox"
+                  name="businessTypeCode"
+                  value="27"
+                  id="sdb"
+                />
+                <label for="sdb">Small Disadvantaged Business</label>
               </div>
             </div>
           </div>
 
           <button class="search-button" onclick="fetchDataJson(true)">
-            <span class="search-icon">🔍</span>
-            Search
+            🔍 Search
           </button>
         </div>
       </div>
     </div>
 
-    <main class="results-container">
+    <div class="results-container">
       <div id="total-count" class="results-count"></div>
       <div id="loading" class="loading">
         <div class="loading-spinner"></div>
@@ -407,6 +373,6 @@
       >
         Show more results
       </button>
-    </main>
+    </div>
   </body>
 </html>

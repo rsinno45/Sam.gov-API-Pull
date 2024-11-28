@@ -30,7 +30,7 @@ class SamGovAPI {
 }
 
 let currentPage = 1;
-const resultsPerPage = 100;
+const resultsPerPage = 10;
 let allResults = [];
 let displayedCageCodes = new Set();
 
@@ -92,6 +92,7 @@ async function fetchData() {
 async function fetchDataJson(resetResults = false) {
   if (resetResults) {
     currentPage = 1;
+    allResults = [];
     document.getElementById("output").innerHTML = "";
   }
 
@@ -99,7 +100,6 @@ async function fetchDataJson(resetResults = false) {
   if (loadingDiv) loadingDiv.style.display = "block";
 
   try {
-    // Get selected certifications and business types
     const selectedCertifications = Array.from(
       document.querySelectorAll('input[name="sbaBusinessTypeCode"]:checked')
     )
@@ -141,20 +141,23 @@ async function fetchDataJson(resetResults = false) {
       throw new Error(data.error);
     }
 
-    // Handle the combined results
     if (data.entityData && data.entityData.length > 0) {
+      allResults = data.entityData;
       document.getElementById("total-count").textContent = `Showing ${Math.min(
-        currentPage * resultsPerPage,
-        data.totalRecords
-      )} of ${data.totalRecords} results`;
+        resultsPerPage,
+        data.entityData.length
+      )} of ${data.entityData.length} results`;
 
-      if (data.totalRecords > currentPage * resultsPerPage) {
-        document.getElementById("load-more").style.display = "block";
+      // Show load more button if there are more results
+      const loadMoreButton = document.getElementById("load-more");
+      if (data.entityData.length > resultsPerPage) {
+        loadMoreButton.style.display = "block";
       } else {
-        document.getElementById("load-more").style.display = "none";
+        loadMoreButton.style.display = "none";
       }
 
-      renderResults(data.entityData, !resetResults);
+      // Only render first page of results
+      renderResults(data.entityData.slice(0, resultsPerPage), false);
     } else {
       document.getElementById("output").innerHTML = "<p>No results found</p>";
       document.getElementById("load-more").style.display = "none";
@@ -164,6 +167,26 @@ async function fetchDataJson(resetResults = false) {
     document.getElementById("output").textContent = `Error: ${error.message}`;
   } finally {
     if (loadingDiv) loadingDiv.style.display = "none";
+  }
+}
+
+function loadMore() {
+  currentPage++;
+  const start = (currentPage - 1) * resultsPerPage;
+  const end = start + resultsPerPage;
+
+  // Update total count display
+  document.getElementById("total-count").textContent = `Showing ${Math.min(
+    end,
+    allResults.length
+  )} of ${allResults.length} results`;
+
+  // Render next batch of results
+  renderResults(allResults.slice(start, end), true);
+
+  // Hide load more button if we've shown all results
+  if (end >= allResults.length) {
+    document.getElementById("load-more").style.display = "none";
   }
 }
 
@@ -181,79 +204,94 @@ function renderResults(results, append = false) {
     return;
   }
 
-  results.forEach((entity, index) => {
-    // Define fields based on the CSV structure
-    const fields = [
-      {
-        label: "First Name",
-        value: entity["governmentBusinessPOC.firstName"],
-      },
-      {
-        label: "Last Name",
-        value: entity["governmentBusinessPOC.lastName"],
-      },
-      {
-        label: "Legal Business Name",
-        value: entity.legalBusinessName,
-      },
-      {
-        label: "DBA",
-        value: entity.dbaName,
-      },
-      {
-        label: "Primary NAICS",
-        value: entity["assertions.primaryNaics"],
-      },
-      {
-        label: "UEI",
-        value: entity.ueiSAM,
-      },
-      {
-        label: "Cage Code",
-        value: entity.cageCode,
-      },
-      {
-        label: "Address",
-        value: [
-          entity["physicalAddress.addressLine1"],
-          entity["physicalAddress.city"],
-          entity["physicalAddress.stateOrProvinceCode"],
-          entity["physicalAddress.zipCode"],
-        ]
-          .filter(Boolean)
-          .join(", "),
-      },
-      {
-        label: "Website",
-        value: entity.entityURL,
-        isLink: true,
-      },
-      {
-        label: "NAICS List",
-        value: entity["assertions.naicsCode"],
-      },
-    ];
+  function renderResults(results, append = false) {
+    const outputElement = document.getElementById("output");
 
-    const businessCard = document.createElement("div");
-    businessCard.className = "result-card";
+    if (!append) {
+      outputElement.innerHTML = "";
+    }
 
-    const fieldsHtml = fields
-      .filter((field) => field.value)
-      .map((field) => {
-        const value = field.isLink
-          ? `<a href="${field.value}" target="_blank">${field.value}</a>`
-          : field.value;
-        return `<p><strong>${field.label}:</strong> ${value}</p>`;
-      })
-      .join("");
+    if (!results || !Array.isArray(results)) {
+      if (!append) {
+        outputElement.innerHTML = "<p>No results found</p>";
+      }
+      return;
+    }
 
-    businessCard.innerHTML = `
+    results.forEach((entity, index) => {
+      const businessCard = document.createElement("div");
+      businessCard.className = "result-card";
+
+      // Define fields based on the CSV structure
+      const fields = [
+        {
+          label: "First Name",
+          value: entity["governmentBusinessPOC.firstName"],
+        },
+        {
+          label: "Last Name",
+          value: entity["governmentBusinessPOC.lastName"],
+        },
+        {
+          label: "Legal Business Name",
+          value: entity.legalBusinessName,
+        },
+        {
+          label: "DBA",
+          value: entity.dbaName,
+        },
+        {
+          label: "Primary NAICS",
+          value: entity["assertions.primaryNaics"],
+        },
+        {
+          label: "UEI",
+          value: entity.ueiSAM,
+        },
+        {
+          label: "Cage Code",
+          value: entity.cageCode,
+        },
+        {
+          label: "Address",
+          value: [
+            entity["physicalAddress.addressLine1"],
+            entity["physicalAddress.city"],
+            entity["physicalAddress.stateOrProvinceCode"],
+            entity["physicalAddress.zipCode"],
+          ]
+            .filter(Boolean)
+            .join(", "),
+        },
+        {
+          label: "Website",
+          value: entity.entityURL,
+          isLink: true,
+        },
+        {
+          label: "NAICS List",
+          value: entity["assertions.naicsCode"],
+        },
+      ];
+
+      const fieldsHtml = fields
+        .filter((field) => field.value)
+        .map((field) => {
+          const value = field.isLink
+            ? `<a href="${field.value}" target="_blank">${field.value}</a>`
+            : field.value;
+          return `<p><strong>${field.label}:</strong> ${value}</p>`;
+        })
+        .join("");
+
+      businessCard.innerHTML = `
       <h4>Result #${index + 1}</h4>
       ${fieldsHtml}
     `;
 
-    outputElement.appendChild(businessCard);
-  });
+      outputElement.appendChild(businessCard);
+    });
+  }
 }
 
 function validateInput(input) {

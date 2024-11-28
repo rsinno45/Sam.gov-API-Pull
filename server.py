@@ -1,7 +1,7 @@
 import os
 from flask import Flask, jsonify, request, make_response
 from flask_cors import CORS
-from sam import SAMDataProcessor
+from Sam import SAMDataProcessor
 
 app = Flask(__name__)
 

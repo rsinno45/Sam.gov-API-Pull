@@ -91,23 +91,37 @@ async function fetchDataJson(resetResults = false) {
   if (loadingDiv) loadingDiv.style.display = "block";
 
   try {
-    const selectedCertifications = Array.from(
+    // Handle both types of certifications separately
+    const sbaTypes = Array.from(
       document.querySelectorAll('input[name="sbaBusinessTypeCode"]:checked')
     )
       .map((checkbox) => checkbox.value)
-      .filter(Boolean)
-      .join("~");
+      .filter(Boolean);
 
-    const businessTypeCode = Array.from(
+    const businessTypes = Array.from(
       document.querySelectorAll('input[name="businessTypeCode"]:checked')
     )
       .map((checkbox) => checkbox.value)
-      .filter(Boolean)
-      .join("~");
+      .filter(Boolean);
 
     const state = document
       .getElementById("physicalAddressProvinceOrStateCode")
       .value.trim();
+
+    // Create the request body with both types
+    const requestBody = {
+      registrationStatus: "A",
+      physicalAddressProvinceOrStateCode: state,
+    };
+
+    // Only add parameters if they have values
+    if (sbaTypes.length > 0) {
+      requestBody.sbaBusinessTypeCode = sbaTypes.join("~");
+    }
+
+    if (businessTypes.length > 0) {
+      requestBody.businessTypeCode = businessTypes.join("~");
+    }
 
     const response = await fetch(
       "https://sam-gov-api-pull.onrender.com/process-sam-data",
@@ -116,12 +130,7 @@ async function fetchDataJson(resetResults = false) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          sbaBusinessTypeCode: selectedCertifications,
-          businessTypeCode: businessTypeCode,
-          physicalAddressProvinceOrStateCode: state,
-          registrationStatus: "A",
-        }),
+        body: JSON.stringify(requestBody),
       }
     );
 
@@ -138,6 +147,7 @@ async function fetchDataJson(resetResults = false) {
         data.entityData.length
       )} of ${data.entityData.length} results`;
 
+      // Show load more button if there are more results
       const loadMoreButton = document.getElementById("load-more");
       if (data.entityData.length > resultsPerPage) {
         loadMoreButton.style.display = "block";
@@ -145,6 +155,7 @@ async function fetchDataJson(resetResults = false) {
         loadMoreButton.style.display = "none";
       }
 
+      // Only render first page of results
       renderResults(data.entityData.slice(0, resultsPerPage), false);
     } else {
       document.getElementById("output").innerHTML = "<p>No results found</p>";

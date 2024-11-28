@@ -57,19 +57,18 @@
       }
 
       .search-container {
-        max-width: 850px;
-        margin: 0 auto;
-        padding: 20px;
+        max-width: 1200px;
+        margin: 20px auto;
+        padding: 0 20px;
       }
-
       .search-bar {
-        display: flex;
-        gap: 20px;
-        padding: 12px 24px;
-        border: 1px solid #ddd;
-        border-radius: 32px;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-        align-items: center;
+        display: grid;
+        grid-template-columns: 1fr 2fr auto;
+        gap: 24px;
+        padding: 24px;
+        border: 1px solid #ebebeb;
+        border-radius: 16px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         background: white;
       }
 
@@ -95,6 +94,10 @@
       }
 
       .checkbox-groups {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+        max-height: none;
         padding: 8px 0;
       }
 
@@ -109,30 +112,33 @@
       }
 
       .checkbox-item {
-        display: block;
-        margin: 6px 0;
-        font-size: 14px;
-        color: #717171;
-      }
-
-      .search-button {
-        background: #ff385c;
-        color: white;
-        border: none;
-        padding: 12px 24px;
-        border-radius: 24px;
-        font-weight: 500;
-        cursor: pointer;
         display: flex;
         align-items: center;
         gap: 8px;
+        padding: 6px 0;
+      }
+
+      .checkbox-item input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+      }
+
+      .search-button {
+        height: fit-content;
+        align-self: flex-end;
+        padding: 16px 32px;
         font-size: 16px;
+        background: #ff385c;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: background-color 0.2s;
       }
 
       .search-button:hover {
         background: #e31c5f;
       }
-
       .results-container {
         max-width: 1600px;
         margin: 0 auto;
@@ -148,41 +154,53 @@
 
       .results-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 24px;
-        margin-top: 24px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 32px;
+        padding: 32px 0;
+        max-width: 1200px;
+        margin: 0 auto;
       }
 
       .result-card {
+        background: white;
         border: 1px solid #ebebeb;
-        border-radius: 12px;
-        overflow: hidden;
+        border-radius: 16px;
+        padding: 24px;
         transition: transform 0.2s, box-shadow 0.2s;
-        padding: 16px;
       }
 
       .result-card:hover {
-        transform: scale(1.02);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
       }
-
       .result-card h4 {
-        font-size: 18px;
+        font-size: 20px;
         font-weight: 600;
-        margin-bottom: 12px;
         color: #222;
+        margin-bottom: 16px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #ebebeb;
       }
 
       .result-card p {
-        font-size: 14px;
-        color: #717171;
-        margin: 8px 0;
-        line-height: 1.4;
+        font-size: 15px;
+        line-height: 1.6;
+        margin: 12px 0;
+        color: #484848;
       }
 
       .result-card strong {
         color: #222;
         font-weight: 500;
+      }
+
+      .result-card a {
+        color: #ff385c;
+        text-decoration: none;
+      }
+
+      .result-card a:hover {
+        text-decoration: underline;
       }
 
       .load-more {
@@ -218,6 +236,22 @@
         border-radius: 50%;
         animation: spin 1s linear infinite;
         margin: 0 auto 16px;
+      }
+
+      @media (max-width: 1024px) {
+        .results-grid {
+          grid-template-columns: 1fr;
+          padding: 20px;
+        }
+
+        .search-bar {
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+
+        .checkbox-groups {
+          grid-template-columns: 1fr;
+        }
       }
 
       @keyframes spin {

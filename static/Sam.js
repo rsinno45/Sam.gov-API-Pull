@@ -287,3 +287,44 @@ function renderResults(results, append = false) {
     outputElement.appendChild(businessCard);
   });
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+  // Add the event listener to the form after DOM is loaded
+  document.getElementById("auth-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    // Add your authentication logic here
+    console.log("Form submitted");
+  });
+});
+
+function toggleAuth(type) {
+  const nameGroup = document.getElementById("name-group");
+  const authSubmit = document.getElementById("auth-submit");
+  const toggleButtons = document.querySelectorAll(".toggle-button");
+
+  // First remove active class from all buttons
+  toggleButtons.forEach((button) => {
+    button.classList.remove("active");
+    button.style.backgroundColor = "#f7f7f7";
+    button.style.color = "#717171";
+  });
+
+  // Then add active class to the clicked button
+  const activeButton = Array.from(toggleButtons).find((button) =>
+    button.textContent.toLowerCase().includes(type)
+  );
+  if (activeButton) {
+    activeButton.classList.add("active");
+    activeButton.style.backgroundColor = "#ff385c";
+    activeButton.style.color = "white";
+  }
+
+  // Update form
+  if (type === "login") {
+    nameGroup.style.display = "none";
+    authSubmit.textContent = "Log in";
+  } else {
+    nameGroup.style.display = "block";
+    authSubmit.textContent = "Sign up";
+  }
+}

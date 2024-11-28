@@ -119,7 +119,7 @@ async function fetchDataJson(resetResults = false) {
       .value.trim();
 
     // Call Flask endpoint with search parameters
-    const response = await fetch("http://localhost:5001/process-sam-data", {
+    const response = await fetch("https://sam-gov-api-pull.onrender.com", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

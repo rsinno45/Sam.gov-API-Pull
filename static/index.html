@@ -15,6 +15,25 @@
           Helvetica, Arial, sans-serif;
       }
 
+      .download-button {
+        background: transparent;
+        border: 1px solid #ff385c;
+        color: #ff385c;
+        padding: 14px 24px;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        margin: 32px auto;
+        display: none;
+        min-width: 200px;
+        transition: all 0.2s;
+      }
+
+      .download-button:hover {
+        background: #fff1f1;
+        transform: translateY(-2px);
+      }
+
       body {
         background-color: #fff;
         color: #222;
@@ -407,6 +426,14 @@
 
           <button class="search-button" onclick="fetchDataJson(true)">
             🔍 Search
+          </button>
+          <button
+            id="download-csv"
+            class="download-button"
+            onclick="fetchData()"
+            style="display: none"
+          >
+            📥 Download CSV
           </button>
         </div>
       </div>

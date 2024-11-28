@@ -34,28 +34,47 @@ const resultsPerPage = 10;
 let allResults = [];
 
 async function fetchData() {
-  const apiKey = "4tzWNeSeCYFZVbsDTPQRKD9skFpJ92tqIDsnPrle";
-  const samApi = new SamGovAPI(apiKey);
-
-  const selectedCertifications = Array.from(
-    document.querySelectorAll('input[name="sbaBusinessTypeCode"]:checked')
-  )
-    .map((checkbox) => checkbox.value)
-    .filter(Boolean)
-    .join(" ");
-
-  const physicalAddressProvinceOrStateCode = document
-    .getElementById("physicalAddressProvinceOrStateCode")
-    .value.trim();
-
-  const socioEconomicParams = {
-    physicalAddressProvinceOrStateCode: physicalAddressProvinceOrStateCode,
-    sbaBusinessTypeCode: selectedCertifications,
-    registrationStatus: "A",
-  };
+  const loadingDiv = document.getElementById("loading");
+  if (loadingDiv) loadingDiv.style.display = "block";
 
   try {
-    const response = await samApi.getPublicData(socioEconomicParams);
+    // Get the same parameters as fetchDataJson
+    const sbaTypes = Array.from(
+      document.querySelectorAll('input[name="sbaBusinessTypeCode"]:checked')
+    )
+      .map((checkbox) => checkbox.value)
+      .filter(Boolean);
+
+    const businessTypes = Array.from(
+      document.querySelectorAll('input[name="businessTypeCode"]:checked')
+    )
+      .map((checkbox) => checkbox.value)
+      .filter(Boolean);
+
+    const state = document
+      .getElementById("physicalAddressProvinceOrStateCode")
+      .value.trim();
+
+    // Create request body
+    const requestBody = {
+      registrationStatus: "A",
+      physicalAddressProvinceOrStateCode: state,
+      format: "csv", // Add this for CSV format
+    };
+
+    if (sbaTypes.length > 0) {
+      requestBody.sbaBusinessTypeCode = sbaTypes.join("~");
+    }
+
+    if (businessTypes.length > 0) {
+      requestBody.businessTypeCode = businessTypes.join("~");
+    }
+
+    // Use your API to get CSV
+    const apiKey = "4tzWNeSeCYFZVbsDTPQRKD9skFpJ92tqIDsnPrle";
+    const samApi = new SamGovAPI(apiKey);
+    const response = await samApi.getPublicData(requestBody);
+
     const downloadUrl = response
       .replace("REPLACE_WITH_API_KEY", apiKey)
       .replace("Extract File will be available for download with url: ", "")
@@ -64,19 +83,13 @@ async function fetchData() {
         ""
       );
 
-    const tokenIndex = downloadUrl.indexOf("token=");
-    if (tokenIndex !== -1) {
-      const outputHtml = `
-        <a id="output-style" href="${downloadUrl}" target="_blank">Click Here To Download CSV</a>
-      `;
-      document.getElementById("output").innerHTML = outputHtml;
-    } else {
-      document.getElementById("output").textContent =
-        "Token not found in the URL.";
-    }
+    // Open download in new tab
+    window.open(downloadUrl, "_blank");
   } catch (error) {
     console.error("API Error:", error);
-    document.getElementById("output").textContent = `Error: ${error.message}`;
+    alert("Error downloading CSV: " + error.message);
+  } finally {
+    if (loadingDiv) loadingDiv.style.display = "none";
   }
 }
 
@@ -142,6 +155,8 @@ async function fetchDataJson(resetResults = false) {
 
     if (data.entityData && data.entityData.length > 0) {
       allResults = data.entityData;
+      document.getElementById("download-csv").style.display = "block";
+
       document.getElementById("total-count").textContent = `Showing ${Math.min(
         resultsPerPage,
         data.entityData.length
@@ -160,6 +175,7 @@ async function fetchDataJson(resetResults = false) {
     } else {
       document.getElementById("output").innerHTML = "<p>No results found</p>";
       document.getElementById("load-more").style.display = "none";
+      document.getElementById("download-csv").style.display = "none";
       document.getElementById("total-count").textContent = "";
     }
   } catch (error) {

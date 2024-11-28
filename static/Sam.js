@@ -155,7 +155,7 @@ async function fetchDataJson(resetResults = false) {
 
     if (data.entityData && data.entityData.length > 0) {
       allResults = data.entityData;
-      document.getElementById("download-csv").style.display = "block";
+      // document.getElementById("download-csv").style.display = "block";
 
       document.getElementById("total-count").textContent = `Showing ${Math.min(
         resultsPerPage,
@@ -288,23 +288,23 @@ function renderResults(results, append = false) {
   });
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-  // Add the event listener to the form after DOM is loaded
-  document.getElementById("auth-form").addEventListener("submit", (e) => {
-    e.preventDefault();
-    // Add your authentication logic here
-    console.log("Form submitted");
-  });
-});
+// document.addEventListener("DOMContentLoaded", function () {
+// Add the event listener to the form after DOM is loaded
+//  document.getElementById("auth-form").addEventListener("submit", (e) => {
+//    e.preventDefault();
+// Add your authentication logic here
+//    console.log("Form submitted");
+//  });
+// });
 
-function toggleAuth(type) {
-  const nameGroup = document.getElementById("name-group");
-  const authSubmit = document.getElementById("auth-submit");
-  const toggleButtons = document.querySelectorAll(".toggle-button");
+//function toggleAuth(type) {
+//  const nameGroup = document.getElementById("name-group");
+//  const authSubmit = document.getElementById("auth-submit");
+//  const toggleButtons = document.querySelectorAll(".toggle-button");
 
-  // First remove active class from all buttons
-  toggleButtons.forEach((button) => {
-    button.classList.remove("active");
+// First remove active class from all buttons
+// toggleButtons.forEach((button) => {
+/*  button.classList.remove("active");
     button.style.backgroundColor = "#f7f7f7";
     button.style.color = "#717171";
   });
@@ -327,4 +327,4 @@ function toggleAuth(type) {
     nameGroup.style.display = "block";
     authSubmit.textContent = "Sign up";
   }
-}
+}*/

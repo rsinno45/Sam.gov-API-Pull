@@ -119,20 +119,21 @@ async function fetchDataJson(resetResults = false) {
       .value.trim();
 
     // Call Flask endpoint with search parameters
-    const response = await fetch("https://sam-gov-api-pull.onrender.com", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      mode: "cors", // Add this line
-      body: JSON.stringify({
-        sbaBusinessTypeCode: selectedCertifications,
-        businessTypeCode: businessTypeCode,
-        physicalAddressProvinceOrStateCode: state,
-        registrationStatus: "A",
-      }),
-    });
+    const response = await fetch(
+      "https://sam-gov-api-pull.onrender.com/process-sam-data",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          sbaBusinessTypeCode: selectedCertifications,
+          businessTypeCode: businessTypeCode,
+          physicalAddressProvinceOrStateCode: state,
+          registrationStatus: "A",
+        }),
+      }
+    );
 
     const data = await response.json();
 

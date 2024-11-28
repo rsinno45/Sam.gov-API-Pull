@@ -5,7 +5,7 @@ from Sam import SAMDataProcessor
 
 app = Flask(__name__)
 
-# Update CORS configuration to allow requests from your Netlify domain
+# CORS configuration
 CORS(app, resources={
     r"/*": {
         "origins": ["https://samapipull.netlify.app"],
@@ -13,6 +13,13 @@ CORS(app, resources={
         "allow_headers": ["Content-Type"]
     }
 })
+
+# Add a root route
+@app.route('/', methods=['GET'])
+def home():
+    response = make_response(jsonify({"message": "SAM.gov API Server is running!"}))
+    response.headers.add("Access-Control-Allow-Origin", "https://samapipull.netlify.app")
+    return response
 
 @app.route('/process-sam-data', methods=['POST', 'OPTIONS'])
 def process_sam_data():

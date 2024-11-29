@@ -126,12 +126,9 @@ async function fetchDataJson(resetResults = false) {
     const requestBody = {
       registrationStatus: "A",
       physicalAddressProvinceOrStateCode: state,
-
-      sbaBusinessTypeDesc:
-        "SBA Certified 8A Program Participant" & "SBA Certified Hub Zone Firm",
+      // Join with logical AND operator
+      sbaBusinessTypeCode: sbaTypes.join("&"),
     };
-
-    // Try querying both business types and SBA business types
 
     console.log("Request Body:", JSON.stringify(requestBody, null, 2));
 
@@ -141,7 +138,6 @@ async function fetchDataJson(resetResults = false) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/json",
         },
         body: JSON.stringify(requestBody),
       }
@@ -153,7 +149,6 @@ async function fetchDataJson(resetResults = false) {
       throw new Error(data.error);
     }
 
-    // Just use the filtered data from the API
     let filteredData = data.entityData;
 
     if (filteredData && filteredData.length > 0) {

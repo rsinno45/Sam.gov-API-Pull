@@ -134,13 +134,14 @@ async function fetchDataJson(resetResults = false) {
       physicalAddressProvinceOrStateCode: state,
     };
 
-    // Send SBA codes as an array instead of a comma-separated string
+    // For AND condition, join with &
     if (sbaTypes.length > 0) {
-      requestBody.sbaBusinessTypeCode = sbaTypes; // Now it will be ["A6", "XX"]
+      requestBody.sbaBusinessTypeCode = sbaTypes.join("&");
     }
 
+    // For OR condition, join with ~
     if (businessTypes.length > 0) {
-      requestBody.businessTypeCode = businessTypes; // Same for business types
+      requestBody.businessTypeCode = businessTypes.join("~");
     }
 
     console.log("Request Body:", JSON.stringify(requestBody, null, 2));
@@ -162,22 +163,8 @@ async function fetchDataJson(resetResults = false) {
       throw new Error(data.error);
     }
 
+    // No need to filter the data as the API should handle the AND condition
     let filteredData = data.entityData;
-    if (sbaTypes.includes("A6") && sbaTypes.includes("XX") && data.entityData) {
-      filteredData = data.entityData.filter((entity) => {
-        const sbaCodes =
-          typeof entity.sbaBusinessTypeCode === "string"
-            ? entity.sbaBusinessTypeCode.split("~")
-            : Array.isArray(entity.sbaBusinessTypeCode)
-            ? entity.sbaBusinessTypeCode
-            : [];
-
-        return (
-          sbaCodes.some((code) => code.startsWith("A6")) &&
-          sbaCodes.some((code) => code.startsWith("XX"))
-        );
-      });
-    }
 
     if (filteredData && filteredData.length > 0) {
       allResults = filteredData;

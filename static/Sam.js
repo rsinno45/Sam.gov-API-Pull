@@ -72,7 +72,7 @@ async function fetchData() {
     };
 
     if (sbaTypes.length > 0) {
-      requestBody.sbaBusinessTypeCode = sbaTypes.join("&");
+      requestBody.sbaBusinessTypeCode = sbaTypes.join("~");
     }
 
     if (businessTypes.length > 0) {

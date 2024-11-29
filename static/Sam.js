@@ -245,18 +245,6 @@ function renderResults(results, append = false) {
             : null,
       },
       {
-        label: "DBA",
-        value: entity.dbaName,
-      },
-      {
-        label: "Primary NAICS",
-        value: entity["assertions.primaryNaics"],
-      },
-      {
-        label: "UEI / Cage Code",
-        value: `${entity.ueiSAM} / ${entity.cageCode}`,
-      },
-      {
         label: "Address",
         value: [
           entity["physicalAddress.addressLine1"],
@@ -268,9 +256,23 @@ function renderResults(results, append = false) {
           .join(", "),
       },
       {
+        label: "DBA",
+        value: entity.dbaName,
+      },
+
+      {
+        label: "UEI / Cage Code",
+        value: `${entity.ueiSAM} / ${entity.cageCode}`,
+      },
+
+      {
         label: "Website",
         value: formatWebsiteUrl(entity.entityURL),
         isLink: true,
+      },
+      {
+        label: "Primary NAICS",
+        value: entity["assertions.primaryNaics"],
       },
       {
         label: "NAICS List",

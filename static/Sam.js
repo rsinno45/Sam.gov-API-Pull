@@ -117,18 +117,17 @@ async function fetchDataJson(resetResults = false) {
       .getElementById("physicalAddressProvinceOrStateCode")
       .value.trim();
 
-    // Create the request body with specific A6 and XX combination
+    // Create the request body using the correct format
     const requestBody = {
       registrationStatus: "A",
       physicalAddressProvinceOrStateCode: state,
-      // Explicitly look for both codes
-      sbaBusinessTypeCode: ["A6", "XX"], // Changed to array format
+      // Send individual codes as separate parameters
+      sbaBusinessTypeCode: ["A6", "XX"], // This matches the documentation format
     };
 
-    console.log("Request Body:", requestBody); // Debug log
-
+    // You might need to adjust your endpoint URL to match your API
     const response = await fetch(
-      "https://sam-gov-api-pull.onrender.com/process-sam-data",
+      "https://sam-gov-api-pull.onrender.com/process-sam-data", // Consider updating this URL
       {
         method: "POST",
         headers: {
@@ -138,23 +137,18 @@ async function fetchDataJson(resetResults = false) {
       }
     );
 
-    console.log("Raw Response:", await response.clone().text()); // Debug log
-
     const data = await response.json();
 
     if (data.error) {
       throw new Error(data.error);
     }
 
-    console.log("Processed Data:", data); // Debug log
-
-    // Filter results to only include entities with both A6 and XX
+    // Filter results to include entities with either A6 or XX certifications
     let filteredData = [];
     if (data.entityData && data.entityData.length > 0) {
       filteredData = data.entityData.filter((entity) => {
-        const sbaCodes = entity.sbaBusinessTypeCode
-          ? entity.sbaBusinessTypeCode.split("~")
-          : [];
+        const sbaCodes = entity.sbaBusinessTypeCode || "";
+        // Look for both A6 and XX in the certification string
         return sbaCodes.includes("A6") && sbaCodes.includes("XX");
       });
     }

@@ -134,15 +134,15 @@ async function fetchDataJson(resetResults = false) {
       physicalAddressProvinceOrStateCode: state,
     };
 
+    // Send SBA codes as an array instead of a comma-separated string
     if (sbaTypes.length > 0) {
-      requestBody.sbaBusinessTypeCode = sbaTypes.join(",");
+      requestBody.sbaBusinessTypeCode = sbaTypes; // Now it will be ["A6", "XX"]
     }
 
     if (businessTypes.length > 0) {
-      requestBody.businessTypeCode = businessTypes.join(",");
+      requestBody.businessTypeCode = businessTypes; // Same for business types
     }
 
-    // Debug log for request
     console.log("Request Body:", JSON.stringify(requestBody, null, 2));
 
     const response = await fetch(
@@ -156,31 +156,11 @@ async function fetchDataJson(resetResults = false) {
       }
     );
 
-    // Debug log for raw response
-    const rawResponse = await response.text();
-    console.log("Raw Response:", rawResponse);
-
-    // Try to parse the response
-    let data;
-    try {
-      data = JSON.parse(rawResponse);
-    } catch (parseError) {
-      console.error("Failed to parse response:", parseError);
-      throw new Error(
-        `Failed to parse response: ${rawResponse.substring(0, 200)}...`
-      );
-    }
+    const data = await response.json();
 
     if (data.error) {
       throw new Error(data.error);
     }
-
-    if (!data.entityData) {
-      throw new Error("No entityData found in response");
-    }
-
-    // Debug log for parsed data
-    console.log("Parsed Data:", data);
 
     let filteredData = data.entityData;
     if (sbaTypes.includes("A6") && sbaTypes.includes("XX") && data.entityData) {

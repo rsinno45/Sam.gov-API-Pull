@@ -76,7 +76,7 @@ async function fetchData() {
     }
 
     if (businessTypes.length > 0) {
-      requestBody.businessTypeCode = businessTypes.join("~");
+      requestBody.businessTypeCode = businessTypes.join(",");
     }
 
     // Use your API to get CSV
@@ -113,21 +113,42 @@ async function fetchDataJson(resetResults = false) {
   if (loadingDiv) loadingDiv.style.display = "block";
 
   try {
+    // Get selected SBA certification codes from checkboxes
+    const sbaTypes = Array.from(
+      document.querySelectorAll('input[name="sbaBusinessTypeCode"]:checked')
+    )
+      .map((checkbox) => checkbox.value)
+      .filter(Boolean);
+
+    // Get selected business type codes from checkboxes
+    const businessTypes = Array.from(
+      document.querySelectorAll('input[name="businessTypeCode"]:checked')
+    )
+      .map((checkbox) => checkbox.value)
+      .filter(Boolean);
+
     const state = document
       .getElementById("physicalAddressProvinceOrStateCode")
       .value.trim();
 
-    // Create the request body using the correct format
+    // Create the request body
     const requestBody = {
       registrationStatus: "A",
       physicalAddressProvinceOrStateCode: state,
-      // Send individual codes as separate parameters
-      sbaBusinessTypeCode: ["A6", "XX"], // This matches the documentation format
     };
 
-    // You might need to adjust your endpoint URL to match your API
+    // Add SBA codes if selected
+    if (sbaTypes.length > 0) {
+      requestBody.sbaBusinessTypeCode = sbaTypes.join(",");
+    }
+
+    // Add business types if selected
+    if (businessTypes.length > 0) {
+      requestBody.businessTypeCode = businessTypes.join(",");
+    }
+
     const response = await fetch(
-      "https://sam-gov-api-pull.onrender.com/process-sam-data", // Consider updating this URL
+      "https://sam-gov-api-pull.onrender.com/process-sam-data",
       {
         method: "POST",
         headers: {
@@ -143,18 +164,28 @@ async function fetchDataJson(resetResults = false) {
       throw new Error(data.error);
     }
 
-    // Filter results to include entities with either A6 or XX certifications
-    let filteredData = [];
-    if (data.entityData && data.entityData.length > 0) {
+    // Filter results if we have both A6 and XX selected
+    let filteredData = data.entityData;
+    if (sbaTypes.includes("A6") && sbaTypes.includes("XX") && data.entityData) {
       filteredData = data.entityData.filter((entity) => {
-        const sbaCodes = entity.sbaBusinessTypeCode || "";
-        // Look for both A6 and XX in the certification string
-        return sbaCodes.includes("A6") && sbaCodes.includes("XX");
+        // Split by tilde since that's the documented format
+        const sbaCodes =
+          typeof entity.sbaBusinessTypeCode === "string"
+            ? entity.sbaBusinessTypeCode.split("~")
+            : Array.isArray(entity.sbaBusinessTypeCode)
+            ? entity.sbaBusinessTypeCode
+            : [];
+
+        return (
+          sbaCodes.some((code) => code.startsWith("A6")) &&
+          sbaCodes.some((code) => code.startsWith("XX"))
+        );
       });
     }
 
-    if (filteredData.length > 0) {
+    if (filteredData && filteredData.length > 0) {
       allResults = filteredData;
+
       document.getElementById("total-count").textContent = `Showing ${Math.min(
         resultsPerPage,
         filteredData.length

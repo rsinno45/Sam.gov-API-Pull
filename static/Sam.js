@@ -113,19 +113,10 @@ async function fetchDataJson(resetResults = false) {
   if (loadingDiv) loadingDiv.style.display = "block";
 
   try {
-    // Get selected SBA certification descriptions instead of codes
     const sbaTypes = Array.from(
       document.querySelectorAll('input[name="sbaBusinessTypeCode"]:checked')
     )
-      .map((checkbox) => {
-        // Map A6 to "SBA Certified 8A Program Participant"
-        // Map XX to "SBA Certified Hub Zone Firm"
-        const descMap = {
-          A6: "SBA Certified 8A Program Participant",
-          XX: "SBA Certified Hub Zone Firm",
-        };
-        return descMap[checkbox.value];
-      })
+      .map((checkbox) => checkbox.value)
       .filter(Boolean);
 
     const state = document
@@ -137,10 +128,12 @@ async function fetchDataJson(resetResults = false) {
       physicalAddressProvinceOrStateCode: state,
     };
 
-    // Create query string for business type descriptions
+    // Try querying both business types and SBA business types
     if (sbaTypes.length > 0) {
-      const queryParts = sbaTypes.map((desc) => `businessTypeDesc:'${desc}'`);
-      requestBody.q = `(${queryParts.join(" AND ")})`;
+      const query = `(sbaBusinessTypeCode:'${sbaTypes.join(
+        "' AND sbaBusinessTypeCode:'"
+      )}')`;
+      requestBody.q = query;
     }
 
     console.log("Request Body:", JSON.stringify(requestBody, null, 2));
@@ -151,6 +144,7 @@ async function fetchDataJson(resetResults = false) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Accept: "application/json",
         },
         body: JSON.stringify(requestBody),
       }
@@ -162,6 +156,7 @@ async function fetchDataJson(resetResults = false) {
       throw new Error(data.error);
     }
 
+    // Just use the filtered data from the API
     let filteredData = data.entityData;
 
     if (filteredData && filteredData.length > 0) {

@@ -76,7 +76,7 @@ async function fetchData() {
     }
 
     if (businessTypes.length > 0) {
-      requestBody.businessTypeCode = businessTypes.join(",");
+      requestBody.businessTypeCode = businessTypes.join("~");
     }
 
     // Use your API to get CSV
@@ -113,8 +113,15 @@ async function fetchDataJson(resetResults = false) {
   if (loadingDiv) loadingDiv.style.display = "block";
 
   try {
+    // Handle both types of certifications separately
     const sbaTypes = Array.from(
       document.querySelectorAll('input[name="sbaBusinessTypeCode"]:checked')
+    )
+      .map((checkbox) => checkbox.value)
+      .filter(Boolean);
+
+    const businessTypes = Array.from(
+      document.querySelectorAll('input[name="businessTypeCode"]:checked')
     )
       .map((checkbox) => checkbox.value)
       .filter(Boolean);
@@ -123,18 +130,20 @@ async function fetchDataJson(resetResults = false) {
       .getElementById("physicalAddressProvinceOrStateCode")
       .value.trim();
 
-    // Format the SBA types as a list of objects
-    const sbaBusinessTypeList = sbaTypes.map((code) => ({
-      sbaBusinessTypeCode: code,
-    }));
-
+    // Create the request body with both types
     const requestBody = {
       registrationStatus: "A",
       physicalAddressProvinceOrStateCode: state,
-      sbaBusinessTypeList: sbaBusinessTypeList,
     };
 
-    console.log("Request Body:", JSON.stringify(requestBody, null, 2));
+    // Only add parameters if they have values
+    if (sbaTypes.length > 0) {
+      requestBody.sbaBusinessTypeCode = sbaTypes.join("~");
+    }
+
+    if (businessTypes.length > 0) {
+      requestBody.businessTypeCode = businessTypes.join("~");
+    }
 
     const response = await fetch(
       "https://sam-gov-api-pull.onrender.com/process-sam-data",
@@ -153,23 +162,25 @@ async function fetchDataJson(resetResults = false) {
       throw new Error(data.error);
     }
 
-    let filteredData = data.entityData;
+    if (data.entityData && data.entityData.length > 0) {
+      allResults = data.entityData;
+      // document.getElementById("download-csv").style.display = "block";
 
-    if (filteredData && filteredData.length > 0) {
-      allResults = filteredData;
       document.getElementById("total-count").textContent = `Showing ${Math.min(
         resultsPerPage,
-        filteredData.length
-      )} of ${filteredData.length} results`;
+        data.entityData.length
+      )} of ${data.entityData.length} results`;
 
+      // Show load more button if there are more results
       const loadMoreButton = document.getElementById("load-more");
-      if (filteredData.length > resultsPerPage) {
+      if (data.entityData.length > resultsPerPage) {
         loadMoreButton.style.display = "block";
       } else {
         loadMoreButton.style.display = "none";
       }
 
-      renderResults(filteredData.slice(0, resultsPerPage), false);
+      // Only render first page of results
+      renderResults(data.entityData.slice(0, resultsPerPage), false);
     } else {
       document.getElementById("output").innerHTML = "<p>No results found</p>";
       document.getElementById("load-more").style.display = "none";
@@ -234,6 +245,18 @@ function renderResults(results, append = false) {
             : null,
       },
       {
+        label: "DBA",
+        value: entity.dbaName,
+      },
+      {
+        label: "Primary NAICS",
+        value: entity["assertions.primaryNaics"],
+      },
+      {
+        label: "UEI / Cage Code",
+        value: `${entity.ueiSAM} / ${entity.cageCode}`,
+      },
+      {
         label: "Address",
         value: [
           entity["physicalAddress.addressLine1"],
@@ -245,23 +268,9 @@ function renderResults(results, append = false) {
           .join(", "),
       },
       {
-        label: "DBA",
-        value: entity.dbaName,
-      },
-
-      {
-        label: "UEI / Cage Code",
-        value: `${entity.ueiSAM} / ${entity.cageCode}`,
-      },
-
-      {
         label: "Website",
         value: formatWebsiteUrl(entity.entityURL),
         isLink: true,
-      },
-      {
-        label: "Primary NAICS",
-        value: entity["assertions.primaryNaics"],
       },
       {
         label: "NAICS List",

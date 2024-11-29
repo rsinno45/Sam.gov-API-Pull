@@ -72,7 +72,7 @@ async function fetchData() {
     };
 
     if (sbaTypes.length > 0) {
-      requestBody.sbaBusinessTypeCode = sbaTypes.join("~");
+      requestBody.sbaBusinessTypeCode = sbaTypes.join("&");
     }
 
     if (businessTypes.length > 0) {
@@ -138,7 +138,7 @@ async function fetchDataJson(resetResults = false) {
 
     // Only add parameters if they have values
     if (sbaTypes.length > 0) {
-      requestBody.sbaBusinessTypeCode = sbaTypes.join("~");
+      requestBody.sbaBusinessTypeCode = sbaTypes.join("&");
     }
 
     if (businessTypes.length > 0) {

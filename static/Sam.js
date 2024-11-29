@@ -127,7 +127,7 @@ async function fetchDataJson(resetResults = false) {
       registrationStatus: "A",
       physicalAddressProvinceOrStateCode: state,
       // Join with logical AND operator
-      sbaBusinessTypeCode: sbaTypes.join("&"),
+      sbaBusinessTypeCode: sbaTypes.join("~"),
     };
 
     console.log("Request Body:", JSON.stringify(requestBody, null, 2));

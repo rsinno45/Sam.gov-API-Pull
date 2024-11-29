@@ -113,16 +113,19 @@ async function fetchDataJson(resetResults = false) {
   if (loadingDiv) loadingDiv.style.display = "block";
 
   try {
+    // Get selected SBA certification descriptions instead of codes
     const sbaTypes = Array.from(
       document.querySelectorAll('input[name="sbaBusinessTypeCode"]:checked')
     )
-      .map((checkbox) => checkbox.value)
-      .filter(Boolean);
-
-    const businessTypes = Array.from(
-      document.querySelectorAll('input[name="businessTypeCode"]:checked')
-    )
-      .map((checkbox) => checkbox.value)
+      .map((checkbox) => {
+        // Map A6 to "SBA Certified 8A Program Participant"
+        // Map XX to "SBA Certified Hub Zone Firm"
+        const descMap = {
+          A6: "SBA Certified 8A Program Participant",
+          XX: "SBA Certified Hub Zone Firm",
+        };
+        return descMap[checkbox.value];
+      })
       .filter(Boolean);
 
     const state = document
@@ -134,14 +137,10 @@ async function fetchDataJson(resetResults = false) {
       physicalAddressProvinceOrStateCode: state,
     };
 
-    // For AND condition, join with &
+    // Create query string for business type descriptions
     if (sbaTypes.length > 0) {
-      requestBody.sbaBusinessTypeCode = sbaTypes.join("&");
-    }
-
-    // For OR condition, join with ~
-    if (businessTypes.length > 0) {
-      requestBody.businessTypeCode = businessTypes.join("~");
+      const queryParts = sbaTypes.map((desc) => `businessTypeDesc:'${desc}'`);
+      requestBody.q = `(${queryParts.join(" AND ")})`;
     }
 
     console.log("Request Body:", JSON.stringify(requestBody, null, 2));
@@ -163,7 +162,6 @@ async function fetchDataJson(resetResults = false) {
       throw new Error(data.error);
     }
 
-    // No need to filter the data as the API should handle the AND condition
     let filteredData = data.entityData;
 
     if (filteredData && filteredData.length > 0) {

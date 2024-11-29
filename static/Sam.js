@@ -113,14 +113,12 @@ async function fetchDataJson(resetResults = false) {
   if (loadingDiv) loadingDiv.style.display = "block";
 
   try {
-    // Get selected SBA certification codes from checkboxes
     const sbaTypes = Array.from(
       document.querySelectorAll('input[name="sbaBusinessTypeCode"]:checked')
     )
       .map((checkbox) => checkbox.value)
       .filter(Boolean);
 
-    // Get selected business type codes from checkboxes
     const businessTypes = Array.from(
       document.querySelectorAll('input[name="businessTypeCode"]:checked')
     )
@@ -131,21 +129,21 @@ async function fetchDataJson(resetResults = false) {
       .getElementById("physicalAddressProvinceOrStateCode")
       .value.trim();
 
-    // Create the request body
     const requestBody = {
       registrationStatus: "A",
       physicalAddressProvinceOrStateCode: state,
     };
 
-    // Add SBA codes if selected
     if (sbaTypes.length > 0) {
       requestBody.sbaBusinessTypeCode = sbaTypes.join(",");
     }
 
-    // Add business types if selected
     if (businessTypes.length > 0) {
       requestBody.businessTypeCode = businessTypes.join(",");
     }
+
+    // Debug log for request
+    console.log("Request Body:", JSON.stringify(requestBody, null, 2));
 
     const response = await fetch(
       "https://sam-gov-api-pull.onrender.com/process-sam-data",
@@ -158,17 +156,35 @@ async function fetchDataJson(resetResults = false) {
       }
     );
 
-    const data = await response.json();
+    // Debug log for raw response
+    const rawResponse = await response.text();
+    console.log("Raw Response:", rawResponse);
+
+    // Try to parse the response
+    let data;
+    try {
+      data = JSON.parse(rawResponse);
+    } catch (parseError) {
+      console.error("Failed to parse response:", parseError);
+      throw new Error(
+        `Failed to parse response: ${rawResponse.substring(0, 200)}...`
+      );
+    }
 
     if (data.error) {
       throw new Error(data.error);
     }
 
-    // Filter results if we have both A6 and XX selected
+    if (!data.entityData) {
+      throw new Error("No entityData found in response");
+    }
+
+    // Debug log for parsed data
+    console.log("Parsed Data:", data);
+
     let filteredData = data.entityData;
     if (sbaTypes.includes("A6") && sbaTypes.includes("XX") && data.entityData) {
       filteredData = data.entityData.filter((entity) => {
-        // Split by tilde since that's the documented format
         const sbaCodes =
           typeof entity.sbaBusinessTypeCode === "string"
             ? entity.sbaBusinessTypeCode.split("~")
@@ -185,7 +201,6 @@ async function fetchDataJson(resetResults = false) {
 
     if (filteredData && filteredData.length > 0) {
       allResults = filteredData;
-
       document.getElementById("total-count").textContent = `Showing ${Math.min(
         resultsPerPage,
         filteredData.length

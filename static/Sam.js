@@ -123,11 +123,15 @@ async function fetchDataJson(resetResults = false) {
       .getElementById("physicalAddressProvinceOrStateCode")
       .value.trim();
 
+    // Format the SBA types as a list of objects
+    const sbaBusinessTypeList = sbaTypes.map((code) => ({
+      sbaBusinessTypeCode: code,
+    }));
+
     const requestBody = {
       registrationStatus: "A",
       physicalAddressProvinceOrStateCode: state,
-      // Join with logical AND operator
-      sbaBusinessTypeCode: sbaTypes.join("~"),
+      sbaBusinessTypeList: sbaBusinessTypeList,
     };
 
     console.log("Request Body:", JSON.stringify(requestBody, null, 2));

@@ -113,37 +113,19 @@ async function fetchDataJson(resetResults = false) {
   if (loadingDiv) loadingDiv.style.display = "block";
 
   try {
-    // Handle both types of certifications separately
-    const sbaTypes = Array.from(
-      document.querySelectorAll('input[name="sbaBusinessTypeCode"]:checked')
-    )
-      .map((checkbox) => checkbox.value)
-      .filter(Boolean);
-
-    const businessTypes = Array.from(
-      document.querySelectorAll('input[name="businessTypeCode"]:checked')
-    )
-      .map((checkbox) => checkbox.value)
-      .filter(Boolean);
-
     const state = document
       .getElementById("physicalAddressProvinceOrStateCode")
       .value.trim();
 
-    // Create the request body with both types
+    // Create the request body with specific A6 and XX combination
     const requestBody = {
       registrationStatus: "A",
       physicalAddressProvinceOrStateCode: state,
+      // Explicitly look for both codes
+      sbaBusinessTypeCode: ["A6", "XX"], // Changed to array format
     };
 
-    // Only add parameters if they have values
-    if (sbaTypes.length > 0) {
-      requestBody.sbaBusinessTypeCode = sbaTypes.join("&");
-    }
-
-    if (businessTypes.length > 0) {
-      requestBody.businessTypeCode = businessTypes.join("~");
-    }
+    console.log("Request Body:", requestBody); // Debug log
 
     const response = await fetch(
       "https://sam-gov-api-pull.onrender.com/process-sam-data",
@@ -156,31 +138,42 @@ async function fetchDataJson(resetResults = false) {
       }
     );
 
+    console.log("Raw Response:", await response.clone().text()); // Debug log
+
     const data = await response.json();
 
     if (data.error) {
       throw new Error(data.error);
     }
 
-    if (data.entityData && data.entityData.length > 0) {
-      allResults = data.entityData;
-      // document.getElementById("download-csv").style.display = "block";
+    console.log("Processed Data:", data); // Debug log
 
+    // Filter results to only include entities with both A6 and XX
+    let filteredData = [];
+    if (data.entityData && data.entityData.length > 0) {
+      filteredData = data.entityData.filter((entity) => {
+        const sbaCodes = entity.sbaBusinessTypeCode
+          ? entity.sbaBusinessTypeCode.split("~")
+          : [];
+        return sbaCodes.includes("A6") && sbaCodes.includes("XX");
+      });
+    }
+
+    if (filteredData.length > 0) {
+      allResults = filteredData;
       document.getElementById("total-count").textContent = `Showing ${Math.min(
         resultsPerPage,
-        data.entityData.length
-      )} of ${data.entityData.length} results`;
+        filteredData.length
+      )} of ${filteredData.length} results`;
 
-      // Show load more button if there are more results
       const loadMoreButton = document.getElementById("load-more");
-      if (data.entityData.length > resultsPerPage) {
+      if (filteredData.length > resultsPerPage) {
         loadMoreButton.style.display = "block";
       } else {
         loadMoreButton.style.display = "none";
       }
 
-      // Only render first page of results
-      renderResults(data.entityData.slice(0, resultsPerPage), false);
+      renderResults(filteredData.slice(0, resultsPerPage), false);
     } else {
       document.getElementById("output").innerHTML = "<p>No results found</p>";
       document.getElementById("load-more").style.display = "none";

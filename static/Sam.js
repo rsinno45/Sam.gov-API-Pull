@@ -123,8 +123,6 @@ async function fetchDataJson(resetResults = false) {
       .getElementById("physicalAddressProvinceOrStateCode")
       .value.trim();
 
-    const stateII = document.getElementById("businessTypeCode").value.trim();
-
     const requestBody = {
       registrationStatus: "A",
       physicalAddressProvinceOrStateCode: state,

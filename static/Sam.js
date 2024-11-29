@@ -33,6 +33,15 @@ let currentPage = 1;
 const resultsPerPage = 10;
 let allResults = [];
 
+function formatWebsiteUrl(url) {
+  if (!url) return null;
+  // If URL doesn't start with http:// or https://, add https://
+  if (!url.match(/^https?:\/\//i)) {
+    return "https://" + url;
+  }
+  return url;
+}
+
 async function fetchData() {
   const loadingDiv = document.getElementById("loading");
   if (loadingDiv) loadingDiv.style.display = "block";
@@ -260,7 +269,7 @@ function renderResults(results, append = false) {
       },
       {
         label: "Website",
-        value: entity.entityURL,
+        value: formatWebsiteUrl(entity.entityURL),
         isLink: true,
       },
       {

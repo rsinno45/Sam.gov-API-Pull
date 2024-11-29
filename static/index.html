@@ -156,13 +156,6 @@
         padding: 20px 40px;
       }
 
-      .results-count {
-        text-align: center;
-        color: #717171;
-        margin: 20px 0;
-        font-size: 14px;
-      }
-
       .results-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
@@ -171,35 +164,43 @@
       }
 
       .result-card {
-        background: #fff;
+        background: white;
         border: 1px solid #ebebeb;
-        border-radius: 12px;
-        padding: 24px;
-        transition: transform 0.2s, box-shadow 0.2s;
+        border-radius: 16px;
+        padding: 32px;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
       }
 
       .result-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
       }
 
       .result-card h4 {
-        font-size: 18px;
+        font-size: 22px;
         font-weight: 600;
         color: #222;
-        margin-bottom: 16px;
+        margin-bottom: 8px;
         padding-bottom: 16px;
         border-bottom: 1px solid #ebebeb;
+        line-height: 1.3;
       }
 
       .result-card p {
-        margin: 12px 0;
-        font-size: 14px;
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        margin: 8px 0;
+        font-size: 15px;
         line-height: 1.5;
-        color: #717171;
+        color: #484848;
       }
 
       .result-card strong {
+        min-width: 120px;
         color: #222;
         font-weight: 500;
       }
@@ -207,31 +208,61 @@
       .result-card a {
         color: #ff385c;
         text-decoration: none;
+        transition: color 0.2s;
       }
 
       .result-card a:hover {
+        color: #e31c5f;
         text-decoration: underline;
       }
 
-      .load-more {
-        background: transparent;
-        border: 1px solid #222;
-        color: #222;
-        padding: 14px 24px;
-        border-radius: 8px;
+      .results-count {
+        text-align: center;
+        color: #484848;
+        font-size: 16px;
+        margin: 32px 0;
         font-weight: 500;
+      }
+
+      .load-more {
+        background: white;
+        border: 1px solid #ff385c;
+        color: #ff385c;
+        padding: 16px 32px;
+        border-radius: 12px;
+        font-weight: 500;
+        font-size: 16px;
         cursor: pointer;
-        margin: 32px auto;
+        margin: 40px auto;
         display: block;
         min-width: 200px;
         transition: all 0.2s;
       }
 
       .load-more:hover {
-        background: #f7f7f7;
+        background: #fff1f1;
         transform: translateY(-2px);
       }
 
+      @media (max-width: 1200px) {
+        .results-container {
+          padding: 20px;
+        }
+
+        .results-grid {
+          gap: 24px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .results-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .result-card {
+          padding: 24px;
+        }
+      }
       .loading {
         display: none;
         text-align: center;

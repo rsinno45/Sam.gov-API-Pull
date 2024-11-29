@@ -1,5 +1,5 @@
 class SamGovAPI {
-  static BASE_URL = "https://api.sam.gov/entity-information/v3/entities?";
+  static BASE_URL = "https://api.sam.gov/entity-information/v2/entities?";
 
   constructor(apiKey) {
     this.apiKey = apiKey;

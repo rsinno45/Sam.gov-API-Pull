@@ -123,18 +123,17 @@ async function fetchDataJson(resetResults = false) {
       .getElementById("physicalAddressProvinceOrStateCode")
       .value.trim();
 
+    const stateII = document.getElementById("businessTypeCode").value.trim();
+
     const requestBody = {
       registrationStatus: "A",
       physicalAddressProvinceOrStateCode: state,
+      businessTypeCode: stateII,
+      sbaBusinessTypeDesc:
+        "SBA Certified 8A Program Participant" & "SBA Certified Hub Zone Firm",
     };
 
     // Try querying both business types and SBA business types
-    if (sbaTypes.length > 0) {
-      const query = `(sbaBusinessTypeCode:'${sbaTypes.join(
-        "' AND sbaBusinessTypeCode:'"
-      )}')`;
-      requestBody.q = query;
-    }
 
     console.log("Request Body:", JSON.stringify(requestBody, null, 2));
 

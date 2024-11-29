@@ -237,14 +237,6 @@ function renderResults(results, append = false) {
         value: entity.legalBusinessName,
       },
       {
-        label: "Point of Contact",
-        value:
-          entity["governmentBusinessPOC.firstName"] &&
-          entity["governmentBusinessPOC.lastName"]
-            ? `${entity["governmentBusinessPOC.firstName"]} ${entity["governmentBusinessPOC.lastName"]}`
-            : null,
-      },
-      {
         label: "Address",
         value: [
           entity["physicalAddress.addressLine1"],
@@ -255,6 +247,15 @@ function renderResults(results, append = false) {
           .filter(Boolean)
           .join(", "),
       },
+      {
+        label: "Point of Contact",
+        value:
+          entity["governmentBusinessPOC.firstName"] &&
+          entity["governmentBusinessPOC.lastName"]
+            ? `${entity["governmentBusinessPOC.firstName"]} ${entity["governmentBusinessPOC.lastName"]}`
+            : null,
+      },
+
       {
         label: "DBA",
         value: entity.dbaName,

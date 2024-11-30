@@ -43,84 +43,13 @@ function formatWebsiteUrl(url) {
 }
 
 // CSV export function
-function fetchData() {
-  try {
-    if (!allResults || allResults.length === 0) {
-      console.error("No data available to export");
-      return;
-    }
-
-    // Define the CSV headers and corresponding data fields
-    const headers = [
-      "Business Name",
-      "DUNS",
-      "CAGE Code",
-      "Address",
-      "City",
-      "State",
-      "ZIP Code",
-      "Country",
-      "Business Types",
-      "SBA Certifications",
-    ];
-
-    // Convert data to CSV format
-    const csvRows = [headers];
-
-    allResults.forEach((entity) => {
-      const row = [
-        entity.legalBusinessName || "",
-        entity.ueiSAM || "",
-        entity.cageCode || "",
-        entity.physicalAddress?.addressLine1 || "",
-        entity.physicalAddress?.city || "",
-        entity.physicalAddress?.stateOrProvinceCode || "",
-        entity.physicalAddress?.zipCode || "",
-        entity.physicalAddress?.countryCode || "",
-        (entity.businessTypes?.businessTypeList || [])
-          .map((type) => type.businessTypeDesc)
-          .join("; ") || "",
-        (entity.businessTypes?.sbaBusinessTypeList || [])
-          .map((type) => type.sbaBusinessTypeDesc)
-          .join("; ") || "",
-      ];
-      csvRows.push(row);
-    });
-
-    // Convert to CSV string
-    const csvContent = csvRows
-      .map((row) =>
-        row
-          .map((cell) => `"${(cell || "").toString().replace(/"/g, '""')}"`)
-          .join(",")
-      )
-      .join("\n");
-
-    // Create and trigger download
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    if (link.download !== undefined) {
-      const url = URL.createObjectURL(blob);
-      link.setAttribute("href", url);
-      link.setAttribute(
-        "download",
-        `sam_data_export_${new Date().toISOString().split("T")[0]}.csv`
-      );
-      link.style.visibility = "hidden";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  } catch (error) {
-    console.error("Error exporting to CSV:", error);
-  }
-}
-
+// Main fetch function
 async function fetchDataJson(resetResults = false) {
   if (resetResults) {
     currentPage = 1;
     allResults = [];
     document.getElementById("output").innerHTML = "";
+    document.getElementById("download-csv").style.display = "none";
   }
 
   const loadingDiv = document.getElementById("loading");
@@ -186,7 +115,6 @@ async function fetchDataJson(resetResults = false) {
     }
 
     if (data.entityData && data.entityData.length > 0) {
-      // Sort the data alphabetically by legal business name
       const sortedData = data.entityData.sort((a, b) =>
         (a.legalBusinessName || "").localeCompare(b.legalBusinessName || "")
       );
@@ -197,6 +125,8 @@ async function fetchDataJson(resetResults = false) {
         resultsPerPage,
         sortedData.length
       )} of ${sortedData.length} results`;
+
+      document.getElementById("download-csv").style.display = "block";
 
       const loadMoreButton = document.getElementById("load-more");
       if (sortedData.length > resultsPerPage) {
@@ -209,14 +139,147 @@ async function fetchDataJson(resetResults = false) {
     } else {
       document.getElementById("output").innerHTML = "<p>No results found</p>";
       document.getElementById("load-more").style.display = "none";
+      document.getElementById("download-csv").style.display = "none";
       document.getElementById("total-count").textContent = "";
     }
   } catch (error) {
     console.error("API Error:", error);
     document.getElementById("output").textContent = `Error: ${error.message}`;
     document.getElementById("total-count").textContent = "";
+    document.getElementById("download-csv").style.display = "none";
   } finally {
     if (loadingDiv) loadingDiv.style.display = "none";
+  }
+}
+
+// CSV export function
+function fetchData() {
+  try {
+    if (!allResults || allResults.length === 0) {
+      console.error("No data available to export");
+      return;
+    }
+
+    const headers = [
+      "Business Name",
+      "UEI",
+      "CAGE Code",
+      "DUNS",
+      "Address Line 1",
+      "Address Line 2",
+      "City",
+      "State",
+      "ZIP Code",
+      "ZIP Code+4",
+      "Country",
+      "Mailing Address Line 1",
+      "Mailing Address Line 2",
+      "Mailing City",
+      "Mailing State",
+      "Mailing ZIP Code",
+      "Mailing ZIP Code+4",
+      "Mailing Country",
+      "Business Types",
+      "SBA Business Types",
+      "Registration Status",
+      "Activation Date",
+      "Expiration Date",
+      "Last Updated",
+      "Purpose of Registration",
+      "DBA Name",
+      "Congressional District",
+      "Entity URL",
+      "Entity Start Date",
+      "Fiscal Year End",
+      "Credit Card Usage",
+      "Debt Subject to Offset",
+    ];
+
+    const csvRows = [headers];
+
+    allResults.forEach((entity) => {
+      const businessTypes =
+        entity.businessTypes?.businessTypeList
+          ?.map((type) => type.businessTypeDesc)
+          .join("; ") || "";
+
+      const sbaTypes =
+        entity.businessTypes?.sbaBusinessTypeList
+          ?.filter((type) => type.sbaBusinessTypeCode)
+          ?.map((type) => type.sbaBusinessTypeDesc)
+          .join("; ") || "";
+
+      const row = [
+        entity.legalBusinessName || "",
+        entity.ueiSAM || "",
+        entity.cageCode || "",
+        entity.dunsBumber || "",
+        entity.physicalAddress?.addressLine1 || "",
+        entity.physicalAddress?.addressLine2 || "",
+        entity.physicalAddress?.city || "",
+        entity.physicalAddress?.stateOrProvinceCode || "",
+        entity.physicalAddress?.zipCode || "",
+        entity.physicalAddress?.zipCodePlus4 || "",
+        entity.physicalAddress?.countryCode || "",
+        entity.mailingAddress?.addressLine1 || "",
+        entity.mailingAddress?.addressLine2 || "",
+        entity.mailingAddress?.city || "",
+        entity.mailingAddress?.stateOrProvinceCode || "",
+        entity.mailingAddress?.zipCode || "",
+        entity.mailingAddress?.zipCodePlus4 || "",
+        entity.mailingAddress?.countryCode || "",
+        businessTypes,
+        sbaTypes,
+        entity.registrationStatus || "",
+        entity.activationDate || "",
+        entity.registrationExpirationDate || "",
+        entity.lastUpdateDate || "",
+        entity.purposeOfRegistrationDesc || "",
+        entity.dbaName || "",
+        entity.congressionalDistrict || "",
+        entity.entityURL || "",
+        entity.entityStartDate || "",
+        entity.fiscalYearEndCloseDate || "",
+        entity.creditCardUsage || "",
+        entity.debtSubjectToOffset || "",
+      ];
+      csvRows.push(row);
+    });
+
+    const csvContent = csvRows
+      .map((row) =>
+        row
+          .map((cell) => {
+            const cellContent = (cell || "").toString();
+            if (
+              cellContent.includes(",") ||
+              cellContent.includes('"') ||
+              cellContent.includes("\n")
+            ) {
+              return `"${cellContent.replace(/"/g, '""')}"`;
+            }
+            return cell;
+          })
+          .join(",")
+      )
+      .join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute(
+        "download",
+        `sam_data_export_${new Date().toISOString().split("T")[0]}.csv`
+      );
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  } catch (error) {
+    console.error("Error exporting to CSV:", error);
   }
 }
 

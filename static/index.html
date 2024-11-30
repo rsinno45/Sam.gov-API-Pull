@@ -308,11 +308,7 @@
     <div class="nav-container">
       <nav class="main-nav">
         <a href="/" class="logo">APEX Business Search</a>
-        <div class="nav-right">
-          <button class="search-button" onclick="fetchData(true)">
-            👤 Download
-          </button>
-        </div>
+        
       </nav>
     </div>
 
@@ -455,6 +451,9 @@
               <label for="sdb">Small Disadvantaged Business</label>
             </div>
           </div>
+          <button id="download-csv" style="display: none;" class="btn" onclick="fetchData()">
+            <i class="fas fa-download"></i> Download Results
+        </button>
 
           <button class="search-button" onclick="fetchDataJson(true)">
             🔍 Search

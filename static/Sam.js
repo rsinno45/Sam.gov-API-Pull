@@ -42,63 +42,77 @@ function formatWebsiteUrl(url) {
   return url;
 }
 
-async function fetchData() {
-  const loadingDiv = document.getElementById("loading");
-  if (loadingDiv) loadingDiv.style.display = "block";
-
+// CSV export function
+function fetchData() {
   try {
-    // Get the same parameters as fetchDataJson
-    const sbaTypes = Array.from(
-      document.querySelectorAll('input[name="sbaBusinessTypeCode"]:checked')
-    )
-      .map((checkbox) => checkbox.value)
-      .filter(Boolean);
-
-    const businessTypes = Array.from(
-      document.querySelectorAll('input[name="businessTypeCode"]:checked')
-    )
-      .map((checkbox) => checkbox.value)
-      .filter(Boolean);
-
-    const state = document
-      .getElementById("physicalAddressProvinceOrStateCode")
-      .value.trim();
-
-    // Create request body
-    const requestBody = {
-      registrationStatus: "A",
-      physicalAddressProvinceOrStateCode: state,
-      format: "csv", // Add this for CSV format
-    };
-
-    if (sbaTypes.length > 0) {
-      requestBody.sbaBusinessTypeCode = sbaTypes.join("~");
+    if (!allResults || allResults.length === 0) {
+      console.error("No data available to export");
+      return;
     }
 
-    if (businessTypes.length > 0) {
-      requestBody.businessTypeCode = businessTypes.join("~");
-    }
+    // Define the CSV headers and corresponding data fields
+    const headers = [
+      "Business Name",
+      "DUNS",
+      "CAGE Code",
+      "Address",
+      "City",
+      "State",
+      "ZIP Code",
+      "Country",
+      "Business Types",
+      "SBA Certifications",
+    ];
 
-    // Use your API to get CSV
-    const apiKey = "4tzWNeSeCYFZVbsDTPQRKD9skFpJ92tqIDsnPrle";
-    const samApi = new SamGovAPI(apiKey);
-    const response = await samApi.getPublicData(requestBody);
+    // Convert data to CSV format
+    const csvRows = [headers];
 
-    const downloadUrl = response
-      .replace("REPLACE_WITH_API_KEY", apiKey)
-      .replace("Extract File will be available for download with url: ", "")
-      .replace(
-        "in some time. If you have requested for an email notification, you will receive it once the file is ready for download.",
-        ""
+    allResults.forEach((entity) => {
+      const row = [
+        entity.legalBusinessName || "",
+        entity.ueiSAM || "",
+        entity.cageCode || "",
+        entity.physicalAddress?.addressLine1 || "",
+        entity.physicalAddress?.city || "",
+        entity.physicalAddress?.stateOrProvinceCode || "",
+        entity.physicalAddress?.zipCode || "",
+        entity.physicalAddress?.countryCode || "",
+        (entity.businessTypes?.businessTypeList || [])
+          .map((type) => type.businessTypeDesc)
+          .join("; ") || "",
+        (entity.businessTypes?.sbaBusinessTypeList || [])
+          .map((type) => type.sbaBusinessTypeDesc)
+          .join("; ") || "",
+      ];
+      csvRows.push(row);
+    });
+
+    // Convert to CSV string
+    const csvContent = csvRows
+      .map((row) =>
+        row
+          .map((cell) => `"${(cell || "").toString().replace(/"/g, '""')}"`)
+          .join(",")
+      )
+      .join("\n");
+
+    // Create and trigger download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute(
+        "download",
+        `sam_data_export_${new Date().toISOString().split("T")[0]}.csv`
       );
-
-    // Open download in new tab
-    window.open(downloadUrl, "_blank");
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   } catch (error) {
-    console.error("API Error:", error);
-    alert("Error downloading CSV: " + error.message);
-  } finally {
-    if (loadingDiv) loadingDiv.style.display = "none";
+    console.error("Error exporting to CSV:", error);
   }
 }
 
@@ -113,7 +127,6 @@ async function fetchDataJson(resetResults = false) {
   if (loadingDiv) loadingDiv.style.display = "block";
 
   try {
-    // Get selected codes
     const sbaTypes = Array.from(
       document.querySelectorAll('input[name="sbaBusinessTypeCode"]:checked')
     )
@@ -130,39 +143,30 @@ async function fetchDataJson(resetResults = false) {
       .getElementById("physicalAddressProvinceOrStateCode")
       .value.trim();
 
-    // Create the request body
     const requestBody = {
       registrationStatus: "A",
       physicalAddressProvinceOrStateCode: state,
     };
 
-    // Build query parts
     let queryParts = [];
 
-    // Add SBA types if selected
     if (sbaTypes.length > 0) {
-      // Create a subquery for SBA business types
       const sbaQuery = sbaTypes
         .map((code) => `sbaBusinessTypeCode:${code}`)
         .join(" AND ");
       queryParts.push(`(${sbaQuery})`);
     }
 
-    // Add business types if selected
     if (businessTypes.length > 0) {
-      // Create a subquery for business types
       const businessQuery = businessTypes
         .map((code) => `businessTypeCode:${code}`)
         .join(" AND ");
       queryParts.push(`(${businessQuery})`);
     }
 
-    // Combine all query parts with AND
     if (queryParts.length > 0) {
       requestBody.q = queryParts.join(" AND ");
     }
-
-    console.log("Request Body:", JSON.stringify(requestBody, null, 2));
 
     const response = await fetch(
       "https://sam-gov-api-pull.onrender.com/process-sam-data",
@@ -182,25 +186,29 @@ async function fetchDataJson(resetResults = false) {
     }
 
     if (data.entityData && data.entityData.length > 0) {
-      allResults = data.entityData;
+      // Sort the data alphabetically by legal business name
+      const sortedData = data.entityData.sort((a, b) =>
+        (a.legalBusinessName || "").localeCompare(b.legalBusinessName || "")
+      );
+
+      allResults = sortedData;
 
       document.getElementById("total-count").textContent = `Showing ${Math.min(
         resultsPerPage,
-        data.entityData.length
-      )} of ${data.entityData.length} results`;
+        sortedData.length
+      )} of ${sortedData.length} results`;
 
       const loadMoreButton = document.getElementById("load-more");
-      if (data.entityData.length > resultsPerPage) {
+      if (sortedData.length > resultsPerPage) {
         loadMoreButton.style.display = "block";
       } else {
         loadMoreButton.style.display = "none";
       }
 
-      renderResults(data.entityData.slice(0, resultsPerPage), false);
+      renderResults(sortedData.slice(0, resultsPerPage), false);
     } else {
       document.getElementById("output").innerHTML = "<p>No results found</p>";
       document.getElementById("load-more").style.display = "none";
-      document.getElementById("download-csv").style.display = "none";
       document.getElementById("total-count").textContent = "";
     }
   } catch (error) {

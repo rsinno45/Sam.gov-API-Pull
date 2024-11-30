@@ -160,92 +160,47 @@ function fetchData() {
       return;
     }
 
+    // Match headers to the fields shown in renderResults
     const headers = [
-      "Business Name",
-      "UEI",
-      "CAGE Code",
-      "DUNS",
-      "Address Line 1",
-      "Address Line 2",
-      "City",
-      "State",
-      "ZIP Code",
-      "ZIP Code+4",
-      "Country",
-      "Mailing Address Line 1",
-      "Mailing Address Line 2",
-      "Mailing City",
-      "Mailing State",
-      "Mailing ZIP Code",
-      "Mailing ZIP Code+4",
-      "Mailing Country",
-      "Business Types",
-      "SBA Business Types",
-      "Registration Status",
-      "Activation Date",
-      "Expiration Date",
-      "Last Updated",
-      "Purpose of Registration",
+      "Legal Business Name",
       "DBA Name",
-      "Congressional District",
-      "Entity URL",
-      "Entity Start Date",
-      "Fiscal Year End",
-      "Credit Card Usage",
-      "Debt Subject to Offset",
+      "UEI",
+      "Cage Code",
+      "Physical Address Line 1",
+      "Physical City",
+      "Physical State",
+      "Physical ZIP Code",
+      "POC First Name",
+      "POC Last Name",
+      "Website",
+      "Primary NAICS",
+      "NAICS List",
     ];
 
     const csvRows = [headers];
 
     allResults.forEach((entity) => {
-      const businessTypes =
-        entity.businessTypes?.businessTypeList
-          ?.map((type) => type.businessTypeDesc)
-          .join("; ") || "";
-
-      const sbaTypes =
-        entity.businessTypes?.sbaBusinessTypeList
-          ?.filter((type) => type.sbaBusinessTypeCode)
-          ?.map((type) => type.sbaBusinessTypeDesc)
-          .join("; ") || "";
-
+      // Match the structure from renderResults
       const row = [
         entity.legalBusinessName || "",
+        entity.dbaName || "",
         entity.ueiSAM || "",
         entity.cageCode || "",
-        entity.dunsBumber || "",
-        entity.physicalAddress?.addressLine1 || "",
-        entity.physicalAddress?.addressLine2 || "",
-        entity.physicalAddress?.city || "",
-        entity.physicalAddress?.stateOrProvinceCode || "",
-        entity.physicalAddress?.zipCode || "",
-        entity.physicalAddress?.zipCodePlus4 || "",
-        entity.physicalAddress?.countryCode || "",
-        entity.mailingAddress?.addressLine1 || "",
-        entity.mailingAddress?.addressLine2 || "",
-        entity.mailingAddress?.city || "",
-        entity.mailingAddress?.stateOrProvinceCode || "",
-        entity.mailingAddress?.zipCode || "",
-        entity.mailingAddress?.zipCodePlus4 || "",
-        entity.mailingAddress?.countryCode || "",
-        businessTypes,
-        sbaTypes,
-        entity.registrationStatus || "",
-        entity.activationDate || "",
-        entity.registrationExpirationDate || "",
-        entity.lastUpdateDate || "",
-        entity.purposeOfRegistrationDesc || "",
-        entity.dbaName || "",
-        entity.congressionalDistrict || "",
+        entity["physicalAddress.addressLine1"] || "",
+        entity["physicalAddress.city"] || "",
+        entity["physicalAddress.stateOrProvinceCode"] || "",
+        entity["physicalAddress.zipCode"] || "",
+        entity["governmentBusinessPOC.firstName"] || "",
+        entity["governmentBusinessPOC.lastName"] || "",
         entity.entityURL || "",
-        entity.entityStartDate || "",
-        entity.fiscalYearEndCloseDate || "",
-        entity.creditCardUsage || "",
-        entity.debtSubjectToOffset || "",
+        entity["assertions.primaryNaics"] || "",
+        entity["assertions.naicsCode"] || "",
       ];
+
       csvRows.push(row);
     });
 
+    // Convert to CSV string with proper escaping
     const csvContent = csvRows
       .map((row) =>
         row
@@ -264,6 +219,7 @@ function fetchData() {
       )
       .join("\n");
 
+    // Create and trigger download
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     if (link.download !== undefined) {
@@ -277,6 +233,7 @@ function fetchData() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     }
   } catch (error) {
     console.error("Error exporting to CSV:", error);

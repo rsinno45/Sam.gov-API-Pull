@@ -325,13 +325,22 @@ function renderResults(results, append = false) {
       },
     ];
 
+    const downloadButton = document.getElementById("download-csv");
+    if (results && results.length > 0) {
+      downloadButton.style.display = "block";
+    } else {
+      downloadButton.style.display = "none";
+    }
+
     const fieldsHtml = fields
       .filter((field) => field.value)
       .map((field) => {
         const value = field.isLink
           ? `<a href="${field.value}" target="_blank">${field.value}</a>`
           : field.value;
-        return `<p><strong>${field.label}:</strong> ${value}</p>`;
+        const className =
+          field.label === "NAICS List" ? ' class="naics-content"' : "";
+        return `<p${className}><strong>${field.label}:</strong> ${value}</p>`;
       })
       .join("");
 

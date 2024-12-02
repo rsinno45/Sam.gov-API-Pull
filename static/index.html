@@ -6,6 +6,11 @@
     <title>Business Search</title>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="Sam.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-firestore.js"></script>
+    <script type="module" src="./index.js"></script>
     <style>
       * {
         box-sizing: border-box;
@@ -13,6 +18,64 @@
         padding: 0;
         font-family: "Gotham SSm A", "Gotham SSm B", -apple-system,
           BlinkMacSystemFont, sans-serif;
+      }
+
+      .auth-buttons {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+      }
+
+      .account-button {
+        background: transparent;
+        border: 1px solid var(--accent);
+        color: var(--accent);
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .account-button:hover {
+        background: var(--accent);
+        color: var(--surface);
+      }
+
+      .user-menu {
+        position: absolute;
+        top: 100%;
+        right: 1.5rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+        display: none;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .user-menu.active {
+        display: block;
+      }
+
+      .user-menu button {
+        width: 100%;
+        padding: 0.5rem 1rem;
+        background: none;
+        border: none;
+        text-align: left;
+        cursor: pointer;
+        color: var(--primary);
+      }
+
+      .user-menu button:hover {
+        background: var(--surface-hover);
+      }
+
+      .saved-indicator {
+        color: var(--accent);
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
       }
 
       :root {
@@ -445,6 +508,25 @@
     <div class="nav-container">
       <nav class="main-nav">
         <a href="/" class="logo">APEX Small Business Search</a>
+        <div class="auth-buttons">
+          <div id="userSection" style="display: none">
+            <button class="account-button" onclick="toggleUserMenu()">
+              <span id="userEmail"></span>
+            </button>
+            <div id="userMenu" class="user-menu">
+              <button onclick="viewSaved()">Saved Businesses</button>
+              <button onclick="signOut()">Sign Out</button>
+            </div>
+          </div>
+          <div id="authButtons">
+            <button
+              class="account-button"
+              onclick="window.location.href='/signup.html'"
+            >
+              Sign In
+            </button>
+          </div>
+        </div>
       </nav>
     </div>
 

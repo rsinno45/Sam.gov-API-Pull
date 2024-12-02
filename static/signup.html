@@ -3,227 +3,148 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SAM.gov Business Search - Sign Up</title>
-    <script src="./Sam.js"></script>
-    <script src="./supabaseClient.js"></script>
+    <title>APEX Small Business Search - Sign Up</title>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-auth.js"></script>
+    <script src="./firebase-config.js"></script>
+    <script src="./signUp.js"></script>
 
     <style>
+      :root {
+        --background: #f8f9fa;
+        --surface: #ffffff;
+        --surface-hover: #eef1f5;
+        --primary: #2c3e50;
+        --secondary: #505c6b;
+        --accent: #0066ff;
+        --border: rgba(44, 62, 80, 0.1);
+      }
+
       * {
         box-sizing: border-box;
         margin: 0;
         padding: 0;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          Helvetica, Arial, sans-serif;
+        font-family: "Gotham SSm A", "Gotham SSm B", -apple-system,
+          BlinkMacSystemFont, sans-serif;
       }
 
       body {
-        background-color: #f7f7f7;
-        color: #222;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-      }
-
-      .nav-container {
-        padding: 20px;
-        background: white;
-        border-bottom: 1px solid #ebebeb;
-      }
-
-      .main-nav {
-        max-width: 1440px;
-        margin: 0 auto;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      .logo {
-        font-size: 24px;
-        font-weight: 600;
-        color: #ff385c;
-        text-decoration: none;
+        background-color: var(--background);
+        color: var(--primary);
+        min-height: 100vh;
       }
 
       .auth-container {
         max-width: 400px;
-        margin: auto;
-        padding: 40px 20px;
+        margin: 8rem auto 2rem;
+        padding: 0 1.5rem;
       }
 
       .auth-box {
-        background: white;
-        padding: 32px;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        background: var(--surface);
+        padding: 2.5rem;
+        border-radius: 1rem;
+        border: 1px solid var(--border);
       }
 
       .auth-header {
         text-align: center;
-        margin-bottom: 24px;
+        margin-bottom: 2rem;
       }
 
       .auth-header h1 {
-        font-size: 24px;
-        color: #222;
-        margin-bottom: 8px;
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
       }
 
       .auth-header p {
-        color: #717171;
-        font-size: 16px;
-      }
-
-      .toggle-container {
-        display: flex;
-        margin-bottom: 24px;
-        border: 1px solid #ebebeb;
-        border-radius: 8px;
-        overflow: hidden;
-        background: #f7f7f7; /* Add this */
-      }
-
-      .toggle-container {
-        display: flex;
-        margin-bottom: 24px;
-        border: 1px solid #ebebeb;
-        border-radius: 8px;
-        overflow: hidden;
-        background: #f7f7f7;
-      }
-
-      .toggle-button {
-        flex: 1;
-        padding: 12px;
-        border: none;
-        background: #f7f7f7; /* Explicit background */
-        cursor: pointer;
-        font-size: 14px;
-        font-weight: 500;
-        color: #717171;
-        transition: all 0.3s ease;
-      }
-
-      /* Make this more specific */
-      .toggle-container .toggle-button.active {
-        background-color: #ff385c !important; /* Add !important for now */
-        color: white !important;
-      }
-
-      .toggle-button:hover:not(.active) {
-        background: #ebebeb;
+        color: var(--secondary);
       }
 
       .input-group {
-        margin-bottom: 16px;
+        margin-bottom: 1.5rem;
       }
 
       .input-group label {
         display: block;
-        font-size: 14px;
-        color: #222;
-        margin-bottom: 8px;
+        font-size: 0.875rem;
+        color: var(--accent);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.5rem;
       }
 
       .input-group input {
         width: 100%;
-        padding: 12px;
-        border: 1px solid #ebebeb;
-        border-radius: 8px;
-        font-size: 14px;
-      }
-
-      .input-group input:focus {
-        outline: none;
-        border-color: #ff385c;
+        padding: 1rem;
+        background: var(--surface-hover);
+        border: 1px solid var(--border);
+        border-radius: 0.5rem;
+        font-size: 1rem;
+        color: var(--primary);
       }
 
       .auth-button {
         width: 100%;
-        padding: 14px;
-        background: #ff385c;
-        color: white;
+        background: var(--accent);
+        color: var(--surface);
         border: none;
-        border-radius: 8px;
-        font-size: 16px;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        font-size: 1rem;
         font-weight: 500;
         cursor: pointer;
-        margin-bottom: 16px;
-        transition: background-color 0.2s;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
       }
 
       .auth-button:hover {
-        background: #e31c5f;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0, 102, 255, 0.2);
       }
 
-      .google-button {
-        width: 100%;
-        padding: 14px;
-        background: white;
-        color: #222;
-        border: 1px solid #ebebeb;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: 500;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        transition: background-color 0.2s;
-      }
-
-      .google-button:hover {
-        background: #f7f7f7;
-      }
-
-      .divider {
-        display: flex;
-        align-items: center;
+      .toggle-auth {
         text-align: center;
-        margin: 16px 0;
-        color: #717171;
+        margin-top: 1rem;
+        color: var(--secondary);
       }
 
-      .divider::before,
-      .divider::after {
-        content: "";
-        flex: 1;
-        border-bottom: 1px solid #ebebeb;
+      .toggle-auth a {
+        color: var(--accent);
+        text-decoration: none;
+        margin-left: 0.5rem;
       }
-
-      .divider span {
-        padding: 0 10px;
-        font-size: 14px;
+      .logo {
+        font-size: 1.25rem;
+        font-weight: 500;
+        color: var(--accent);
+        text-decoration: none;
+        letter-spacing: 1px;
+        text-transform: uppercase;
       }
     </style>
   </head>
   <body>
     <div class="nav-container">
       <nav class="main-nav">
-        <a href="/" class="logo">SAM.gov Business Search</a>
+        <a href="/" class="logo">APEX Small Business Search</a>
       </nav>
     </div>
 
     <div class="auth-container">
       <div class="auth-box">
         <div class="auth-header">
-          <h1>Welcome to SAM.gov Search</h1>
-          <p>Sign up to search & save small business info</p>
+          <h1>Welcome to APEX</h1>
+          <p>Sign up to save and manage business information</p>
         </div>
 
-        <div class="toggle-container">
-          <button class="toggle-button active" onclick="toggleAuth('signup')">
-            Sign up
-          </button>
-          <button class="toggle-button" onclick="toggleAuth('login')">
-            Log in
-          </button>
-        </div>
-
-        <form id="auth-form">
-          <div class="input-group" id="name-group">
-            <label for="name">Full name</label>
+        <form id="authForm" onsubmit="handleAuth(event)">
+          <div class="input-group" id="nameGroup">
+            <label for="name">Full Name</label>
             <input type="text" id="name" required />
           </div>
 
@@ -237,41 +158,14 @@
             <input type="password" id="password" required />
           </div>
 
-          <button type="submit" class="auth-button" id="auth-submit">
-            Sign up
+          <button type="submit" class="auth-button" id="authSubmit">
+            Sign Up
           </button>
 
-          <div class="divider">
-            <span>or</span>
+          <div class="toggle-auth">
+            Already have an account?
+            <a href="#" onclick="toggleAuthMode()">Log In</a>
           </div>
-
-          <button type="button" class="google-button">
-            <svg
-              width="18"
-              height="18"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 48 48"
-            >
-              <path
-                fill="#EA4335"
-                d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
-              />
-              <path
-                fill="#4285F4"
-                d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
-              />
-              <path
-                fill="#34A853"
-                d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
-              />
-              <path fill="none" d="M0 0h48v48H0z" />
-            </svg>
-            Continue with Google
-          </button>
         </form>
       </div>
     </div>

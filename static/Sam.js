@@ -175,6 +175,7 @@ function fetchData() {
       "Website",
       "Primary NAICS",
       "NAICS List",
+      "Phone Number",
     ];
 
     const csvRows = [headers];
@@ -195,6 +196,7 @@ function fetchData() {
         entity.entityURL || "",
         entity["assertions.primaryNaics"] || "",
         entity["assertions.naicsCode"] || "",
+        entity.phoneNumber || "",
       ];
 
       csvRows.push(row);
@@ -292,12 +294,16 @@ function renderResults(results, append = false) {
           .join(", "),
       },
       {
-        label: "Point of Contact",
+        label: "Owner Name",
         value:
           entity["governmentBusinessPOC.firstName"] &&
           entity["governmentBusinessPOC.lastName"]
             ? `${entity["governmentBusinessPOC.firstName"]} ${entity["governmentBusinessPOC.lastName"]}`
             : null,
+      },
+      {
+        label: "Phone Number",
+        value: entity.phoneNumber,
       },
 
       {

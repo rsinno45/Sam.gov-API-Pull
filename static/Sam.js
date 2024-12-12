@@ -196,7 +196,7 @@ function fetchData() {
         entity.entityURL || "",
         entity["assertions.primaryNaics"] || "",
         entity["assertions.naicsCode"] || "",
-        entity.phoneNumber || "",
+        entity[phoneNumber] || "",
       ];
 
       csvRows.push(row);
@@ -303,7 +303,7 @@ function renderResults(results, append = false) {
       },
       {
         label: "Phone Number",
-        value: entity.phoneNumber,
+        value: entity["phoneNumber"],
       },
 
       {

@@ -225,6 +225,152 @@ async function fetchDataByName(resetResults = false) {
   }
 }
 
+async function fetchDataByUEI(resetResults = false) {
+  if (resetResults) {
+    currentPage = 1;
+    allResults = [];
+    document.getElementById("output").innerHTML = "";
+    document.getElementById("download-csv").style.display = "none";
+  }
+
+  const loadingDiv = document.getElementById("loading");
+  if (loadingDiv) loadingDiv.style.display = "block";
+
+  const UEI = document.getElementById("uei-name").value;
+
+  try {
+    const requestBody = {
+      ueiSAM: UEI,
+    };
+
+    const response = await fetch(
+      "https://sam-gov-api-pull.onrender.com/process-sam-data",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.error) {
+      throw new Error(data.error);
+    }
+
+    if (data.entityData && data.entityData.length > 0) {
+      const sortedData = data.entityData.sort((a, b) =>
+        (a.ueiSAM || "").localeCompare(b.ueiSAM || "")
+      );
+
+      allResults = sortedData;
+
+      document.getElementById("total-count").textContent = `Showing ${Math.min(
+        resultsPerPage,
+        sortedData.length
+      )} of ${sortedData.length} results`;
+
+      document.getElementById("download-csv").style.display = "block";
+
+      const loadMoreButton = document.getElementById("load-more");
+      if (sortedData.length > resultsPerPage) {
+        loadMoreButton.style.display = "block";
+      } else {
+        loadMoreButton.style.display = "none";
+      }
+
+      renderResults(sortedData.slice(0, resultsPerPage), false);
+    } else {
+      document.getElementById("output").innerHTML = "<p>No results found</p>";
+      document.getElementById("load-more").style.display = "none";
+      document.getElementById("download-csv").style.display = "none";
+      document.getElementById("total-count").textContent = "";
+    }
+  } catch (error) {
+    console.error("API Error:", error);
+    document.getElementById("output").textContent = `Error: ${error.message}`;
+    document.getElementById("total-count").textContent = "";
+    document.getElementById("download-csv").style.display = "none";
+  } finally {
+    if (loadingDiv) loadingDiv.style.display = "none";
+  }
+}
+
+async function fetchDataByCAGE(resetResults = false) {
+  if (resetResults) {
+    currentPage = 1;
+    allResults = [];
+    document.getElementById("output").innerHTML = "";
+    document.getElementById("download-csv").style.display = "none";
+  }
+
+  const loadingDiv = document.getElementById("loading");
+  if (loadingDiv) loadingDiv.style.display = "block";
+
+  const cageCodeVar = document.getElementById("cage-name").value;
+
+  try {
+    const requestBody = {
+      cageCode: cageCodeVar,
+    };
+
+    const response = await fetch(
+      "https://sam-gov-api-pull.onrender.com/process-sam-data",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.error) {
+      throw new Error(data.error);
+    }
+
+    if (data.entityData && data.entityData.length > 0) {
+      const sortedData = data.entityData.sort((a, b) =>
+        (a.cageCode || "").localeCompare(b.cageCode || "")
+      );
+
+      allResults = sortedData;
+
+      document.getElementById("total-count").textContent = `Showing ${Math.min(
+        resultsPerPage,
+        sortedData.length
+      )} of ${sortedData.length} results`;
+
+      document.getElementById("download-csv").style.display = "block";
+
+      const loadMoreButton = document.getElementById("load-more");
+      if (sortedData.length > resultsPerPage) {
+        loadMoreButton.style.display = "block";
+      } else {
+        loadMoreButton.style.display = "none";
+      }
+
+      renderResults(sortedData.slice(0, resultsPerPage), false);
+    } else {
+      document.getElementById("output").innerHTML = "<p>No results found</p>";
+      document.getElementById("load-more").style.display = "none";
+      document.getElementById("download-csv").style.display = "none";
+      document.getElementById("total-count").textContent = "";
+    }
+  } catch (error) {
+    console.error("API Error:", error);
+    document.getElementById("output").textContent = `Error: ${error.message}`;
+    document.getElementById("total-count").textContent = "";
+    document.getElementById("download-csv").style.display = "none";
+  } finally {
+    if (loadingDiv) loadingDiv.style.display = "none";
+  }
+}
+
 // CSV export function
 function fetchData() {
   try {
@@ -432,43 +578,51 @@ function renderResults(results, append = false) {
   });
 }
 
-// document.addEventListener("DOMContentLoaded", function () {
-// Add the event listener to the form after DOM is loaded
-//  document.getElementById("auth-form").addEventListener("submit", (e) => {
-//    e.preventDefault();
-// Add your authentication logic here
-//    console.log("Form submitted");
-//  });
-// });
+// Add this to handle radio button changes
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll('input[name="search-type"]').forEach((radio) => {
+    radio.addEventListener("change", (e) => {
+      console.log("Event listener triggered!");
+      const businessNameGroup = document.getElementById("business-name-group");
+      const ueiNumber = document.getElementById("uei-group");
+      const cageCode = document.getElementById("cage-group");
+      const certificationsGroup = document.getElementById(
+        "certifications-group"
+      );
+      const businessBtn = document.getElementById("businessSearchButton");
+      const ueiBtn = document.getElementById("ueiSearchButton");
+      const cageBtn = document.getElementById("cageSearchButton");
+      const certBtn = document.getElementById("certSearchButton");
 
-//function toggleAuth(type) {
-//  const nameGroup = document.getElementById("name-group");
-//  const authSubmit = document.getElementById("auth-submit");
-//  const toggleButtons = document.querySelectorAll(".toggle-button");
+      // Hide all groups
+      businessNameGroup.style.display = "none";
+      ueiNumber.style.display = "none";
+      cageCode.style.display = "none";
+      certificationsGroup.style.display = "none";
+      businessBtn.style.display = "none";
+      ueiBtn.style.display = "none";
+      cageBtn.style.display = "none";
+      certBtn.style.display = "none";
 
-// First remove active class from all buttons
-// toggleButtons.forEach((button) => {
-/*  button.classList.remove("active");
-    button.style.backgroundColor = "#f7f7f7";
-    button.style.color = "#717171";
+      // Show selected group
+      switch (e.target.value) {
+        case "name":
+          businessNameGroup.style.display = "block";
+          businessBtn.style.display = "block";
+          break;
+        case "socio":
+          certificationsGroup.style.display = "block";
+          certBtn.style.display = "block";
+          break;
+        case "cage":
+          cageCode.style.display = "block";
+          cageBtn.style.display = "block";
+          break;
+        case "uei":
+          ueiNumber.style.display = "block";
+          ueiBtn.style.display = "block";
+          break;
+      }
+    });
   });
-
-  // Then add active class to the clicked button
-  const activeButton = Array.from(toggleButtons).find((button) =>
-    button.textContent.toLowerCase().includes(type)
-  );
-  if (activeButton) {
-    activeButton.classList.add("active");
-    activeButton.style.backgroundColor = "#ff385c";
-    activeButton.style.color = "white";
-  }
-
-  // Update form
-  if (type === "login") {
-    nameGroup.style.display = "none";
-    authSubmit.textContent = "Log in";
-  } else {
-    nameGroup.style.display = "block";
-    authSubmit.textContent = "Sign up";
-  }
-}*/
+});

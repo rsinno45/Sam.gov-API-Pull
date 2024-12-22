@@ -34,6 +34,18 @@ def process_sam_data():
             'legalBusinessName': params['legalBusinessName'],
             'registrationStatus': 'A'  # Keep active status filter
         }
+    # If it's a UEI search
+    else if 'ueiSAM' in params:
+        search_params = {
+            'ueiSAM': params['ueiSAM'],
+            'registrationStatus': 'A'  # Keep active status filter
+        }
+    # If it's a CAGE search
+    else if 'cageCode' in params:
+        search_params = {
+            'cageCode': params['cageCode'],
+            'registrationStatus': 'A'  # Keep active status filter
+        }
     # If it's a socio-economic search
     else:
         search_params = {
@@ -53,7 +65,7 @@ def process_sam_data():
         return jsonify(json_data)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-        
+
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)

@@ -41,17 +41,34 @@
 
     <div class="search-container">
       <div class="search-type-container">
-        <div class="toggle-container">
-          <span class="toggle-label">Search by Business Name</span>
-          <label class="toggle-switch">
-            <input
-              type="checkbox"
-              id="search-toggle"
-              onchange="toggleSearchType()"
-            />
-            <span class="toggle-slider"></span>
-          </label>
-          <span class="toggle-label">Search by Certifications</span>
+        <div class="search-options">
+          <input
+            type="radio"
+            id="name-search"
+            name="search-type"
+            value="name"
+            checked
+          />
+          <label for="name-search">Business Name</label>
+
+          <input type="radio" id="uei-search" name="search-type" value="uei" />
+          <label for="uei-search">UEI</label>
+
+          <input
+            type="radio"
+            id="cage-search"
+            name="search-type"
+            value="cage"
+          />
+          <label for="cage-search">CAGE Code</label>
+
+          <input
+            type="radio"
+            id="socio-search"
+            name="search-type"
+            value="socio"
+          />
+          <label for="socio-search">Certifications</label>
         </div>
       </div>
 
@@ -127,6 +144,26 @@
               id="business-name"
               class="search-input"
               placeholder="Enter business name..."
+            />
+          </div>
+
+          <div class="search-group" id="uei-group" style="display: none">
+            <h3>UEI Number</h3>
+            <input
+              type="text"
+              id="uei-name"
+              class="search-input"
+              placeholder="Enter UEI..."
+            />
+          </div>
+
+          <div class="search-group" id="cage-group" style="display: none">
+            <h3>CAGE Code</h3>
+            <input
+              type="text"
+              id="cage-name"
+              class="search-input"
+              placeholder="Enter CAGE Code..."
             />
           </div>
 
@@ -226,6 +263,22 @@
           >
             Search by Name
           </button>
+          <button
+            class="search-button"
+            id="ueiSearchButton"
+            onclick="fetchDataByUEI(true)"
+            style="display: none"
+          >
+            Search by UEI
+          </button>
+          <button
+            class="search-button"
+            id="cageSearchButton"
+            onclick="fetchDataByCAGE(true)"
+            style="display: none"
+          >
+            Search by CAGE
+          </button>
         </div>
       </div>
     </div>
@@ -249,36 +302,5 @@
         Load More
       </button>
     </div>
-
-    <script>
-      // In your toggleSearchType function
-      function toggleSearchType() {
-        const toggle = document.getElementById("search-toggle");
-        const businessNameGroup = document.getElementById(
-          "business-name-group"
-        );
-        const certificationsGroup = document.getElementById(
-          "certifications-group"
-        );
-        const businessSearchButton = document.getElementById(
-          "businessSearchButton"
-        );
-        const certSearchButton = document.getElementById("certSearchButton");
-
-        if (toggle.checked) {
-          // Show certifications, hide business name
-          businessNameGroup.style.display = "none";
-          certificationsGroup.style.display = "block";
-          businessSearchButton.style.display = "none";
-          certSearchButton.style.display = "block";
-        } else {
-          // Show business name, hide certifications
-          businessNameGroup.style.display = "block";
-          certificationsGroup.style.display = "none";
-          businessSearchButton.style.display = "block";
-          certSearchButton.style.display = "none";
-        }
-      }
-    </script>
   </body>
 </html>

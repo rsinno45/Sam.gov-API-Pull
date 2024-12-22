@@ -37,22 +37,23 @@ def process_sam_data():
     # If it's a socio-economic search
     else:
         search_params = {
-            'registrationStatus': 'A',
-            'businessTypeCode': params.get('businessTypeCode'),
-            'sbaBusinessTypeCode': params.get('sbaBusinessTypeCode'),
+            'registrationStatus': params.get('registrationStatus'),
             'physicalAddressProvinceOrStateCode': params.get('physicalAddressProvinceOrStateCode')
         }
+        # If there's a query string, add it
+        if 'q' in params:
+            search_params['q'] = params['q']
+            
         # Remove None values
         search_params = {k: v for k, v in search_params.items() if v is not None}
     
     try:
-        # Your existing processing code
         processor = SAMDataProcessor(API_KEY)
         json_data = processor.download_and_process(search_params)
         return jsonify(json_data)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
+        
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)

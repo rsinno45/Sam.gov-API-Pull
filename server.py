@@ -21,38 +21,35 @@ def home():
     response.headers.add("Access-Control-Allow-Origin", "https://samapipull.netlify.app")
     return response
 
-@app.route('/process-sam-data', methods=['POST', 'OPTIONS'])
+@app.route('/process-sam-data', methods=['POST'])
 def process_sam_data():
-    if request.method == "OPTIONS":
-        response = make_response()
-        response.headers.add("Access-Control-Allow-Origin", "https://samapipull.netlify.app")
-        response.headers.add("Access-Control-Allow-Headers", "Content-Type")
-        response.headers.add("Access-Control-Allow-Methods", "POST")
-        return response, 200
-
-    api_key = "4tzWNeSeCYFZVbsDTPQRKD9skFpJ92tqIDsnPrle"
-    processor = SAMDataProcessor(api_key)
+    params = request.json
+    
+    # If it's a business name search
+    if 'legalBusinessName' in params:
+        search_params = {
+            'legalBusinessName': params['legalBusinessName'],
+            'registrationStatus': 'A'  # Keep active status filter
+        }
+    # If it's a socio-economic search
+    else:
+        search_params = {
+            'registrationStatus': 'A',
+            'businessTypeCode': params.get('businessTypeCode'),
+            'sbaBusinessTypeCode': params.get('sbaBusinessTypeCode'),
+            'physicalAddressProvinceOrStateCode': params.get('physicalAddressProvinceOrStateCode')
+        }
+        # Remove None values
+        search_params = {k: v for k, v in search_params.items() if v is not None}
     
     try:
-        params = request.json
-        print("Received parameters:", params)
-        
-        # Convert the ~ to & for AND logic
-        if params.get('businessTypeCode'):
-            params['businessTypeCode'] = '&'.join(params['businessTypeCode'].split('~'))
-        if params.get('sbaBusinessTypeCode'):
-            params['sbaBusinessTypeCode'] = '&'.join(params['sbaBusinessTypeCode'].split('~'))
-            
-        json_data = processor.download_and_process(params)
-        response = make_response(jsonify(json_data))
-        response.headers.add("Access-Control-Allow-Origin", "https://samapipull.netlify.app")
-        return response
+        # Your existing processing code
+        processor = SAMDataProcessor(API_KEY)
+        json_data = processor.download_and_process(search_params)
+        return jsonify(json_data)
     except Exception as e:
-        print(f"Error processing request: {str(e)}")
-        error_response = make_response(jsonify({'error': str(e)}), 500)
-        error_response.headers.add("Access-Control-Allow-Origin", "https://samapipull.netlify.app")
-        return error_response
-
+        return jsonify({'error': str(e)}), 500
+        
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)

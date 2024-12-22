@@ -76,13 +76,13 @@ class SAMDataProcessor:
 
 def main():
     # Example usage
-    api_key = "4tzWNeSeCYFZVbsDTPQRKD9skFpJ92tqIDsnPrle"
+    api_key = "aeexHkkiLWKA5RSqNCE3tAKw5EyQh36tX6JmLBLF"
     processor = SAMDataProcessor(api_key)
     
     # Example search parameters
     params = {
-        'businessTypeCode': '27',  # Small Disadvantaged Business
-        'physicalAddressProvinceOrStateCode': 'CA',
+        
+        
         'registrationStatus': 'A'
     }
     

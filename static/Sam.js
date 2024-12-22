@@ -152,6 +152,80 @@ async function fetchDataJson(resetResults = false) {
   }
 }
 
+async function fetchDataByName(resetResults = false) {
+  if (resetResults) {
+    currentPage = 1;
+    allResults = [];
+    document.getElementById("output").innerHTML = "";
+    document.getElementById("download-csv").style.display = "none";
+  }
+
+  const loadingDiv = document.getElementById("loading");
+  if (loadingDiv) loadingDiv.style.display = "block";
+
+  const businessName = document.getElementById("business-name");
+
+  try {
+    const requestBody = {
+      registrationStatus: "A",
+      legalBusinessName: businessName,
+    };
+
+    const response = await fetch(
+      "https://sam-gov-api-pull.onrender.com/process-sam-data",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.error) {
+      throw new Error(data.error);
+    }
+
+    if (data.entityData && data.entityData.length > 0) {
+      const sortedData = data.entityData.sort((a, b) =>
+        (a.legalBusinessName || "").localeCompare(b.legalBusinessName || "")
+      );
+
+      allResults = sortedData;
+
+      document.getElementById("total-count").textContent = `Showing ${Math.min(
+        resultsPerPage,
+        sortedData.length
+      )} of ${sortedData.length} results`;
+
+      document.getElementById("download-csv").style.display = "block";
+
+      const loadMoreButton = document.getElementById("load-more");
+      if (sortedData.length > resultsPerPage) {
+        loadMoreButton.style.display = "block";
+      } else {
+        loadMoreButton.style.display = "none";
+      }
+
+      renderResults(sortedData.slice(0, resultsPerPage), false);
+    } else {
+      document.getElementById("output").innerHTML = "<p>No results found</p>";
+      document.getElementById("load-more").style.display = "none";
+      document.getElementById("download-csv").style.display = "none";
+      document.getElementById("total-count").textContent = "";
+    }
+  } catch (error) {
+    console.error("API Error:", error);
+    document.getElementById("output").textContent = `Error: ${error.message}`;
+    document.getElementById("total-count").textContent = "";
+    document.getElementById("download-csv").style.display = "none";
+  } finally {
+    if (loadingDiv) loadingDiv.style.display = "none";
+  }
+}
+
 // CSV export function
 function fetchData() {
   try {

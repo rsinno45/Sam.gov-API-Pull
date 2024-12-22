@@ -35,13 +35,13 @@ def process_sam_data():
             'registrationStatus': 'A'  # Keep active status filter
         }
     # If it's a UEI search
-    else if 'ueiSAM' in params:
+    elif 'ueiSAM' in params:
         search_params = {
             'ueiSAM': params['ueiSAM'],
             'registrationStatus': 'A'  # Keep active status filter
         }
     # If it's a CAGE search
-    else if 'cageCode' in params:
+    elif 'cageCode' in params:
         search_params = {
             'cageCode': params['cageCode'],
             'registrationStatus': 'A'  # Keep active status filter

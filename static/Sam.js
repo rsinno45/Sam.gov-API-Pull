@@ -163,11 +163,10 @@ async function fetchDataByName(resetResults = false) {
   const loadingDiv = document.getElementById("loading");
   if (loadingDiv) loadingDiv.style.display = "block";
 
-  const businessName = document.getElementById("business-name");
+  const businessName = document.getElementById("business-name").value;
 
   try {
     const requestBody = {
-      registrationStatus: "A",
       legalBusinessName: businessName,
     };
 

@@ -584,6 +584,7 @@ document.addEventListener("DOMContentLoaded", () => {
     radio.addEventListener("change", (e) => {
       console.log("Event listener triggered!");
       const businessNameGroup = document.getElementById("business-name-group");
+      const locationGroup = document.getElementById("location-group");
       const ueiNumber = document.getElementById("uei-group");
       const cageCode = document.getElementById("cage-group");
       const certificationsGroup = document.getElementById(
@@ -596,6 +597,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Hide all groups
       businessNameGroup.style.display = "none";
+      locationGroup.style.display = "none";
       ueiNumber.style.display = "none";
       cageCode.style.display = "none";
       certificationsGroup.style.display = "none";
@@ -613,6 +615,7 @@ document.addEventListener("DOMContentLoaded", () => {
         case "socio":
           certificationsGroup.style.display = "block";
           certBtn.style.display = "block";
+          locationGroup.style.display = "block";
           break;
         case "cage":
           cageCode.style.display = "block";

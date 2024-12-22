@@ -47,7 +47,6 @@
             id="name-search"
             name="search-type"
             value="name"
-            checked
           />
           <label for="name-search">Business Name</label>
 
@@ -67,6 +66,7 @@
             id="socio-search"
             name="search-type"
             value="socio"
+            checked
           />
           <label for="socio-search">Certifications</label>
         </div>
@@ -74,7 +74,7 @@
 
       <div class="search-section">
         <div class="search-grid">
-          <div class="search-group">
+          <div class="search-group" id="location-group">
             <h3>Location</h3>
             <select id="physicalAddressProvinceOrStateCode">
               <option value="">Select a state...</option>
@@ -252,7 +252,7 @@
             id="certSearchButton"
             onclick="fetchDataJson(true)"
           >
-            Search by Certification
+            Search
           </button>
 
           <button
@@ -261,7 +261,7 @@
             onclick="fetchDataByName(true)"
             style="display: none"
           >
-            Search by Name
+            Search
           </button>
           <button
             class="search-button"
@@ -269,7 +269,7 @@
             onclick="fetchDataByUEI(true)"
             style="display: none"
           >
-            Search by UEI
+            Search
           </button>
           <button
             class="search-button"
@@ -277,7 +277,7 @@
             onclick="fetchDataByCAGE(true)"
             style="display: none"
           >
-            Search by CAGE
+            Search
           </button>
         </div>
       </div>

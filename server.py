@@ -5,6 +5,8 @@ from Sam import SAMDataProcessor
 
 app = Flask(__name__)
 
+API_KEY = "aeexHkkiLWKA5RSqNCE3tAKw5EyQh36tX6JmLBLF"  # Example key
+
 # CORS configuration
 CORS(app, resources={
     r"/*": {
@@ -24,6 +26,7 @@ def home():
 @app.route('/process-sam-data', methods=['POST'])
 def process_sam_data():
     params = request.json
+    API_KEY = "aeexHkkiLWKA5RSqNCE3tAKw5EyQh36tX6JmLBLF"  # Example key
     
     # If it's a business name search
     if 'legalBusinessName' in params:
@@ -49,7 +52,7 @@ def process_sam_data():
         return jsonify(json_data)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-        
+
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)

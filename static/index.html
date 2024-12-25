@@ -63,6 +63,14 @@
 
           <input
             type="radio"
+            id="naics-search"
+            name="search-type"
+            value="naics"
+          />
+          <label for="cage-search">Naics Code</label>
+
+          <input
+            type="radio"
             id="socio-search"
             name="search-type"
             value="socio"
@@ -164,6 +172,16 @@
               id="cage-name"
               class="search-input"
               placeholder="Enter CAGE Code..."
+            />
+          </div>
+
+          <div class="search-group" id="naics-group" style="display: none">
+            <h3>Naics Code</h3>
+            <input
+              type="text"
+              id="naics-name"
+              class="search-input"
+              placeholder="Enter Naics Code..."
             />
           </div>
 
@@ -350,6 +368,14 @@
             class="search-button"
             id="ueiSearchButton"
             onclick="fetchDataByUEI(true)"
+            style="display: none"
+          >
+            Search
+          </button>
+          <button
+            class="search-button"
+            id="naicsSearchButton"
+            onclick="fetchDataByNaics(true)"
             style="display: none"
           >
             Search

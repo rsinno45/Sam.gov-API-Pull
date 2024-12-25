@@ -46,6 +46,12 @@ def process_sam_data():
             'cageCode': params['cageCode'],
             'registrationStatus': 'A'  # Keep active status filter
         }
+    # If it's a Naics search
+    elif 'naicsCode' in params:
+        search_params = {
+            'naicsCode': params['naicsCode'],
+            'registrationStatus': 'A'  # Keep active status filter
+        }
     # If it's a socio-economic search
     else:
         search_params = {

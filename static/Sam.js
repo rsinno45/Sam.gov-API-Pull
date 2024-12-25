@@ -371,6 +371,79 @@ async function fetchDataByCAGE(resetResults = false) {
   }
 }
 
+async function fetchDataByNaics(resetResults = false) {
+  if (resetResults) {
+    currentPage = 1;
+    allResults = [];
+    document.getElementById("output").innerHTML = "";
+    document.getElementById("download-csv").style.display = "none";
+  }
+
+  const loadingDiv = document.getElementById("loading");
+  if (loadingDiv) loadingDiv.style.display = "block";
+
+  const naicsCodeVar = document.getElementById("naics-name").value;
+
+  try {
+    const requestBody = {
+      naicsCode: naicsCodeVar,
+    };
+
+    const response = await fetch(
+      "https://sam-gov-api-pull.onrender.com/process-sam-data",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.error) {
+      throw new Error(data.error);
+    }
+
+    if (data.entityData && data.entityData.length > 0) {
+      const sortedData = data.entityData.sort((a, b) =>
+        (a.naicsCode || "").localeCompare(b.naicsCode || "")
+      );
+
+      allResults = sortedData;
+
+      document.getElementById("total-count").textContent = `Showing ${Math.min(
+        resultsPerPage,
+        sortedData.length
+      )} of ${sortedData.length} results`;
+
+      document.getElementById("download-csv").style.display = "block";
+
+      const loadMoreButton = document.getElementById("load-more");
+      if (sortedData.length > resultsPerPage) {
+        loadMoreButton.style.display = "block";
+      } else {
+        loadMoreButton.style.display = "none";
+      }
+
+      renderResults(sortedData.slice(0, resultsPerPage), false);
+    } else {
+      document.getElementById("output").innerHTML = "<p>No results found</p>";
+      document.getElementById("load-more").style.display = "none";
+      document.getElementById("download-csv").style.display = "none";
+      document.getElementById("total-count").textContent = "";
+    }
+  } catch (error) {
+    console.error("API Error:", error);
+    document.getElementById("output").textContent = `Error: ${error.message}`;
+    document.getElementById("total-count").textContent = "";
+    document.getElementById("download-csv").style.display = "none";
+  } finally {
+    if (loadingDiv) loadingDiv.style.display = "none";
+  }
+}
+
 // CSV export function
 function fetchData() {
   try {
@@ -587,12 +660,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const locationGroup = document.getElementById("location-group");
       const ueiNumber = document.getElementById("uei-group");
       const cageCode = document.getElementById("cage-group");
+      const naicsCode = document.getElementById("naics-group");
       const certificationsGroup = document.getElementById(
         "certifications-group"
       );
       const businessBtn = document.getElementById("businessSearchButton");
       const ueiBtn = document.getElementById("ueiSearchButton");
       const cageBtn = document.getElementById("cageSearchButton");
+      const naicsBtn = document.getElementById("naicsSearchButton");
       const certBtn = document.getElementById("certSearchButton");
 
       // Hide all groups
@@ -600,10 +675,12 @@ document.addEventListener("DOMContentLoaded", () => {
       locationGroup.style.display = "none";
       ueiNumber.style.display = "none";
       cageCode.style.display = "none";
+      naicsCode.style.display = "none";
       certificationsGroup.style.display = "none";
       businessBtn.style.display = "none";
       ueiBtn.style.display = "none";
       cageBtn.style.display = "none";
+      naicsBtn.style.display = "none";
       certBtn.style.display = "none";
 
       // Show selected group
@@ -620,6 +697,10 @@ document.addEventListener("DOMContentLoaded", () => {
         case "cage":
           cageCode.style.display = "block";
           cageBtn.style.display = "block";
+          break;
+        case "naics":
+          naicsCode.style.display = "block";
+          naicsBtn.style.display = "block";
           break;
         case "uei":
           ueiNumber.style.display = "block";

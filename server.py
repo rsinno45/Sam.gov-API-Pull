@@ -2,6 +2,7 @@ import os
 from flask import Flask, jsonify, request, make_response
 from flask_cors import CORS
 from Sam import SAMDataProcessor
+from dsbs_scraper import DSBSDataScraper
 
 app = Flask(__name__)
 
@@ -71,6 +72,23 @@ def process_sam_data():
         return jsonify(json_data)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/get-dsbs-data', methods=['POST'])
+def get_dsbs_data():
+    data = request.json
+    uei = data.get('uei')
+    cage_code = data.get('cage_code')
+    state = data.get('state')  # Add state parameter
+    
+    if not all([uei, cage_code, state]):
+        return jsonify({'error': 'Must provide UEI, CAGE code, and state'}), 400
+        
+    try:
+        scraper = DSBSDataScraper()
+        contact_info = scraper.get_contact_info(uei=uei, cage_code=cage_code, state=state)
+        return jsonify(contact_info)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500 
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))

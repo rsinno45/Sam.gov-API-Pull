@@ -565,10 +565,11 @@ function renderResults(results, append = false) {
     return;
   }
 
-  results.forEach((entity, index) => {
+  results.forEach(async (entity, index) => {
     const businessCard = document.createElement("div");
     businessCard.className = "result-card";
 
+    // First render SAM.gov data
     const fields = [
       {
         label: "Legal Business Name",
@@ -642,9 +643,25 @@ function renderResults(results, append = false) {
       })
       .join("");
 
+    // Add button HTML before the closing businessCard div
+    const contactButtonHtml = `
+      <div class="contact-info-section">
+        <button 
+          class="contact-info-btn" 
+          onclick="fetchContactInfo(this)" 
+          data-uei="${entity.ueiSAM}" 
+          data-cage="${entity.cageCode}"
+          data-state="${entity["physicalAddress.stateOrProvinceCode"]}">
+          Get Contact Information
+        </button>
+        <div class="contact-info-results" style="display: none;"></div>
+      </div>
+    `;
+
     businessCard.innerHTML = `
       <h4>${entity.legalBusinessName}</h4>
       ${fieldsHtml}
+      ${contactButtonHtml}
     `;
 
     outputElement.appendChild(businessCard);
@@ -710,3 +727,60 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 });
+
+// Add this function to handle fetching contact info
+async function fetchContactInfo(button) {
+  const resultDiv = button.nextElementSibling;
+  button.disabled = true;
+  button.textContent = "Loading...";
+
+  try {
+    const response = await fetch(
+      "https://sam-gov-api-pull.onrender.com/get-dsbs-data",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          uei: button.dataset.uei,
+          cage_code: button.dataset.cage,
+          state: button.dataset.state,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.success) {
+      let contactHtml = '<div class="additional-contact-info">';
+      if (data.email_addresses.length > 0) {
+        contactHtml += `<p><strong>Email Addresses:</strong> ${data.email_addresses.join(
+          ", "
+        )}</p>`;
+      }
+      if (data.phone_numbers.length > 0) {
+        contactHtml += `<p><strong>Phone Numbers:</strong> ${data.phone_numbers.join(
+          ", "
+        )}</p>`;
+      }
+      if (data.additional_contacts.length > 0) {
+        contactHtml += `<p><strong>Additional Contacts:</strong></p><ul>`;
+        data.additional_contacts.forEach((contact) => {
+          contactHtml += `<li>${contact}</li>`;
+        });
+        contactHtml += "</ul>";
+      }
+      contactHtml += "</div>";
+      resultDiv.innerHTML = contactHtml;
+    } else {
+      resultDiv.innerHTML = `<p class="error">Error: ${data.error}</p>`;
+    }
+  } catch (error) {
+    resultDiv.innerHTML = `<p class="error">Error fetching contact information</p>`;
+  } finally {
+    button.disabled = false;
+    button.textContent = "Get Contact Information";
+    resultDiv.style.display = "block";
+  }
+}

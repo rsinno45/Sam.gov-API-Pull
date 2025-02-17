@@ -56,6 +56,11 @@ class DSBSDataScraper:
             response = self.session.post(self.SEARCH_URL, data=search_params)
             response.raise_for_status()
             
+            # Add logging
+            print("DSBS Response Status:", response.status_code)
+            print("DSBS Response URL:", response.url)
+            print("DSBS Response Text:", response.text[:500])  # First 500 chars
+            
             # Parse the results page
             soup = BeautifulSoup(response.text, 'html.parser')
             

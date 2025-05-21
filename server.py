@@ -6,7 +6,7 @@ from dsbs_scraper import DSBSDataScraper
 
 app = Flask(__name__)
 
-API_KEY = "aeexHkkiLWKA5RSqNCE3tAKw5EyQh36tX6JmLBLF"  # Example key
+API_KEY = "1N3Uevlh2s2CFCOcO2Da2pgSEpC5oesbzXDwEVxp"  # Example key
 
 # CORS configuration
 CORS(app, resources={
@@ -27,7 +27,7 @@ def home():
 @app.route('/process-sam-data', methods=['POST'])
 def process_sam_data():
     params = request.json
-    API_KEY = "aeexHkkiLWKA5RSqNCE3tAKw5EyQh36tX6JmLBLF"  # Example key
+    API_KEY = "1N3Uevlh2s2CFCOcO2Da2pgSEpC5oesbzXDwEVxp"  # Example key
     
     # If it's a business name search
     if 'legalBusinessName' in params:

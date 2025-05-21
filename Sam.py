@@ -76,7 +76,7 @@ class SAMDataProcessor:
 
 def main():
     # Example usage
-    api_key = "aeexHkkiLWKA5RSqNCE3tAKw5EyQh36tX6JmLBLF"
+    api_key = "1N3Uevlh2s2CFCOcO2Da2pgSEpC5oesbzXDwEVxp"
     processor = SAMDataProcessor(api_key)
     
     # Example search parameters

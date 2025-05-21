@@ -40,48 +40,48 @@
     </div>
 
     <div class="search-container">
-      <div class="search-type-container">
-        <div class="search-options">
-          <input
-            type="radio"
-            id="name-search"
-            name="search-type"
-            value="name"
-          />
-          <label for="name-search">Business Name</label>
-
-          <input type="radio" id="uei-search" name="search-type" value="uei" />
-          <label for="uei-search">UEI</label>
-
-          <input
-            type="radio"
-            id="cage-search"
-            name="search-type"
-            value="cage"
-          />
-          <label for="cage-search">CAGE Code</label>
-
-          <input
-            type="radio"
-            id="naics-search"
-            name="search-type"
-            value="naics"
-          />
-          <label for="cage-search">Naics Code</label>
-
-          <input
-            type="radio"
-            id="socio-search"
-            name="search-type"
-            value="socio"
-            checked
-          />
-          <label for="socio-search">Certifications</label>
-        </div>
-      </div>
-
       <div class="search-section">
         <div class="search-grid">
+          <div class="search-group" id="business-name-group">
+            <h3>Business Name</h3>
+            <input
+              type="text"
+              id="business-name"
+              class="search-input"
+              placeholder="Enter business name..."
+            />
+          </div>
+
+          <div class="search-group" id="uei-group">
+            <h3>UEI Number</h3>
+            <input
+              type="text"
+              id="uei-name"
+              class="search-input"
+              placeholder="Enter UEI..."
+            />
+          </div>
+
+          <div class="search-group" id="cage-group">
+            <h3>CAGE Code</h3>
+            <input
+              type="text"
+              id="cage-name"
+              class="search-input"
+              placeholder="Enter CAGE Code..."
+            />
+          </div>
+
+          <div class="search-group" id="naics-group">
+            <h3>NAICS Code</h3>
+            <input
+              type="text"
+              id="naics-name"
+              class="search-input"
+              placeholder="Enter NAICS Code..."
+            />
+          </div>
+
           <div class="search-group" id="location-group">
             <h3>Location</h3>
             <select id="physicalAddressProvinceOrStateCode">
@@ -139,50 +139,6 @@
               <option value="WY">Wyoming</option>
               <option value="AS">American Samoa</option>
             </select>
-          </div>
-
-          <div
-            class="search-group"
-            id="business-name-group"
-            style="display: none"
-          >
-            <h3>Business Name</h3>
-            <input
-              type="text"
-              id="business-name"
-              class="search-input"
-              placeholder="Enter business name..."
-            />
-          </div>
-
-          <div class="search-group" id="uei-group" style="display: none">
-            <h3>UEI Number</h3>
-            <input
-              type="text"
-              id="uei-name"
-              class="search-input"
-              placeholder="Enter UEI..."
-            />
-          </div>
-
-          <div class="search-group" id="cage-group" style="display: none">
-            <h3>CAGE Code</h3>
-            <input
-              type="text"
-              id="cage-name"
-              class="search-input"
-              placeholder="Enter CAGE Code..."
-            />
-          </div>
-
-          <div class="search-group" id="naics-group" style="display: none">
-            <h3>Naics Code</h3>
-            <input
-              type="text"
-              id="naics-name"
-              class="search-input"
-              placeholder="Enter Naics Code..."
-            />
           </div>
 
           <div class="search-group" id="certifications-group">
@@ -348,44 +304,7 @@
             </div>
           </div>
 
-          <button
-            class="search-button"
-            id="certSearchButton"
-            onclick="fetchDataJson(true)"
-          >
-            Search
-          </button>
-
-          <button
-            class="search-button"
-            id="businessSearchButton"
-            onclick="fetchDataByName(true)"
-            style="display: none"
-          >
-            Search
-          </button>
-          <button
-            class="search-button"
-            id="ueiSearchButton"
-            onclick="fetchDataByUEI(true)"
-            style="display: none"
-          >
-            Search
-          </button>
-          <button
-            class="search-button"
-            id="naicsSearchButton"
-            onclick="fetchDataByNaics(true)"
-            style="display: none"
-          >
-            Search
-          </button>
-          <button
-            class="search-button"
-            id="cageSearchButton"
-            onclick="fetchDataByCAGE(true)"
-            style="display: none"
-          >
+          <button class="search-button" onclick="performSearch()">
             Search
           </button>
         </div>

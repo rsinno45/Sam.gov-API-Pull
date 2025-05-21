@@ -130,10 +130,20 @@ body {
 
 .search-grid {
   display: grid;
-  /* Change to 3 equal columns */
-  grid-template-columns: 1fr 2fr 120px;
-  gap: 2rem;
-  align-items: start;
+  grid-template-columns: repeat(3, 1fr); /* 3 columns for input fields */
+  gap: 1.5rem;
+}
+
+/* Make certifications group span full width */
+#certifications-group {
+  grid-column: 1 / -1; /* Span all columns */
+}
+
+/* Make search button span full width */
+.search-button {
+  grid-column: 1 / -1;
+  max-width: 200px;
+  justify-self: center;
 }
 
 .search-group {
@@ -438,8 +448,7 @@ select:hover {
   }
 
   .search-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
@@ -462,7 +471,7 @@ select:hover {
 
 @media (max-width: 768px) {
   .checkbox-group {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
   }
 }
 
@@ -563,10 +572,9 @@ input:checked + .toggle-slider:before {
   box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.1);
 }
 
-.search-type-container {
-  max-width: 1400px;
-  margin: 0 auto 1rem;
-  padding: 0 1.5rem;
+.search-type-container,
+.search-options {
+  display: none;
 }
 
 .contact-info-btn {

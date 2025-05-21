@@ -152,7 +152,10 @@ async function fetchDataJson(resetResults = false) {
   }
 }
 
-async function fetchDataByName(resetResults = false) {
+// Remove all the individual search functions (fetchDataByName, fetchDataByUEI, etc.)
+// Add this new combined search function:
+
+async function performSearch(resetResults = true) {
   if (resetResults) {
     currentPage = 1;
     allResults = [];
@@ -163,12 +166,57 @@ async function fetchDataByName(resetResults = false) {
   const loadingDiv = document.getElementById("loading");
   if (loadingDiv) loadingDiv.style.display = "block";
 
-  const businessName = document.getElementById("business-name").value;
-
   try {
+    // Get all search parameters
+    const businessName = document.getElementById("business-name").value.trim();
+    const ueiNumber = document.getElementById("uei-name").value.trim();
+    const cageCode = document.getElementById("cage-name").value.trim();
+    const naicsCode = document.getElementById("naics-name").value.trim();
+    const state = document
+      .getElementById("physicalAddressProvinceOrStateCode")
+      .value.trim();
+
+    // Get selected certifications
+    const sbaTypes = Array.from(
+      document.querySelectorAll('input[name="sbaBusinessTypeCode"]:checked')
+    )
+      .map((checkbox) => checkbox.value)
+      .filter(Boolean);
+
+    const businessTypes = Array.from(
+      document.querySelectorAll('input[name="businessTypeCode"]:checked')
+    )
+      .map((checkbox) => checkbox.value)
+      .filter(Boolean);
+
+    // Build request body with all parameters
     const requestBody = {
-      legalBusinessName: businessName,
+      registrationStatus: "A",
     };
+
+    if (businessName) requestBody.legalBusinessName = businessName;
+    if (ueiNumber) requestBody.ueiSAM = ueiNumber;
+    if (cageCode) requestBody.cageCode = cageCode;
+    if (naicsCode) requestBody.naicsCode = naicsCode;
+    if (state) requestBody.physicalAddressProvinceOrStateCode = state;
+
+    // Build certification query
+    let queryParts = [];
+    if (sbaTypes.length > 0) {
+      const sbaQuery = sbaTypes
+        .map((code) => `sbaBusinessTypeCode:${code}`)
+        .join(" AND ");
+      queryParts.push(`(${sbaQuery})`);
+    }
+    if (businessTypes.length > 0) {
+      const businessQuery = businessTypes
+        .map((code) => `businessTypeCode:${code}`)
+        .join(" AND ");
+      queryParts.push(`(${businessQuery})`);
+    }
+    if (queryParts.length > 0) {
+      requestBody.q = queryParts.join(" AND ");
+    }
 
     const response = await fetch(
       "https://sam-gov-api-pull.onrender.com/process-sam-data",
@@ -202,230 +250,8 @@ async function fetchDataByName(resetResults = false) {
       document.getElementById("download-csv").style.display = "block";
 
       const loadMoreButton = document.getElementById("load-more");
-      if (sortedData.length > resultsPerPage) {
-        loadMoreButton.style.display = "block";
-      } else {
-        loadMoreButton.style.display = "none";
-      }
-
-      renderResults(sortedData.slice(0, resultsPerPage), false);
-    } else {
-      document.getElementById("output").innerHTML = "<p>No results found</p>";
-      document.getElementById("load-more").style.display = "none";
-      document.getElementById("download-csv").style.display = "none";
-      document.getElementById("total-count").textContent = "";
-    }
-  } catch (error) {
-    console.error("API Error:", error);
-    document.getElementById("output").textContent = `Error: ${error.message}`;
-    document.getElementById("total-count").textContent = "";
-    document.getElementById("download-csv").style.display = "none";
-  } finally {
-    if (loadingDiv) loadingDiv.style.display = "none";
-  }
-}
-
-async function fetchDataByUEI(resetResults = false) {
-  if (resetResults) {
-    currentPage = 1;
-    allResults = [];
-    document.getElementById("output").innerHTML = "";
-    document.getElementById("download-csv").style.display = "none";
-  }
-
-  const loadingDiv = document.getElementById("loading");
-  if (loadingDiv) loadingDiv.style.display = "block";
-
-  const UEI = document.getElementById("uei-name").value;
-
-  try {
-    const requestBody = {
-      ueiSAM: UEI,
-    };
-
-    const response = await fetch(
-      "https://sam-gov-api-pull.onrender.com/process-sam-data",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      }
-    );
-
-    const data = await response.json();
-
-    if (data.error) {
-      throw new Error(data.error);
-    }
-
-    if (data.entityData && data.entityData.length > 0) {
-      const sortedData = data.entityData.sort((a, b) =>
-        (a.ueiSAM || "").localeCompare(b.ueiSAM || "")
-      );
-
-      allResults = sortedData;
-
-      document.getElementById("total-count").textContent = `Showing ${Math.min(
-        resultsPerPage,
-        sortedData.length
-      )} of ${sortedData.length} results`;
-
-      document.getElementById("download-csv").style.display = "block";
-
-      const loadMoreButton = document.getElementById("load-more");
-      if (sortedData.length > resultsPerPage) {
-        loadMoreButton.style.display = "block";
-      } else {
-        loadMoreButton.style.display = "none";
-      }
-
-      renderResults(sortedData.slice(0, resultsPerPage), false);
-    } else {
-      document.getElementById("output").innerHTML = "<p>No results found</p>";
-      document.getElementById("load-more").style.display = "none";
-      document.getElementById("download-csv").style.display = "none";
-      document.getElementById("total-count").textContent = "";
-    }
-  } catch (error) {
-    console.error("API Error:", error);
-    document.getElementById("output").textContent = `Error: ${error.message}`;
-    document.getElementById("total-count").textContent = "";
-    document.getElementById("download-csv").style.display = "none";
-  } finally {
-    if (loadingDiv) loadingDiv.style.display = "none";
-  }
-}
-
-async function fetchDataByCAGE(resetResults = false) {
-  if (resetResults) {
-    currentPage = 1;
-    allResults = [];
-    document.getElementById("output").innerHTML = "";
-    document.getElementById("download-csv").style.display = "none";
-  }
-
-  const loadingDiv = document.getElementById("loading");
-  if (loadingDiv) loadingDiv.style.display = "block";
-
-  const cageCodeVar = document.getElementById("cage-name").value;
-
-  try {
-    const requestBody = {
-      cageCode: cageCodeVar,
-    };
-
-    const response = await fetch(
-      "https://sam-gov-api-pull.onrender.com/process-sam-data",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      }
-    );
-
-    const data = await response.json();
-
-    if (data.error) {
-      throw new Error(data.error);
-    }
-
-    if (data.entityData && data.entityData.length > 0) {
-      const sortedData = data.entityData.sort((a, b) =>
-        (a.cageCode || "").localeCompare(b.cageCode || "")
-      );
-
-      allResults = sortedData;
-
-      document.getElementById("total-count").textContent = `Showing ${Math.min(
-        resultsPerPage,
-        sortedData.length
-      )} of ${sortedData.length} results`;
-
-      document.getElementById("download-csv").style.display = "block";
-
-      const loadMoreButton = document.getElementById("load-more");
-      if (sortedData.length > resultsPerPage) {
-        loadMoreButton.style.display = "block";
-      } else {
-        loadMoreButton.style.display = "none";
-      }
-
-      renderResults(sortedData.slice(0, resultsPerPage), false);
-    } else {
-      document.getElementById("output").innerHTML = "<p>No results found</p>";
-      document.getElementById("load-more").style.display = "none";
-      document.getElementById("download-csv").style.display = "none";
-      document.getElementById("total-count").textContent = "";
-    }
-  } catch (error) {
-    console.error("API Error:", error);
-    document.getElementById("output").textContent = `Error: ${error.message}`;
-    document.getElementById("total-count").textContent = "";
-    document.getElementById("download-csv").style.display = "none";
-  } finally {
-    if (loadingDiv) loadingDiv.style.display = "none";
-  }
-}
-
-async function fetchDataByNaics(resetResults = false) {
-  if (resetResults) {
-    currentPage = 1;
-    allResults = [];
-    document.getElementById("output").innerHTML = "";
-    document.getElementById("download-csv").style.display = "none";
-  }
-
-  const loadingDiv = document.getElementById("loading");
-  if (loadingDiv) loadingDiv.style.display = "block";
-
-  const naicsCodeVar = document.getElementById("naics-name").value;
-
-  try {
-    const requestBody = {
-      naicsCode: naicsCodeVar,
-    };
-
-    const response = await fetch(
-      "https://sam-gov-api-pull.onrender.com/process-sam-data",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      }
-    );
-
-    const data = await response.json();
-
-    if (data.error) {
-      throw new Error(data.error);
-    }
-
-    if (data.entityData && data.entityData.length > 0) {
-      const sortedData = data.entityData.sort((a, b) =>
-        (a.naicsCode || "").localeCompare(b.naicsCode || "")
-      );
-
-      allResults = sortedData;
-
-      document.getElementById("total-count").textContent = `Showing ${Math.min(
-        resultsPerPage,
-        sortedData.length
-      )} of ${sortedData.length} results`;
-
-      document.getElementById("download-csv").style.display = "block";
-
-      const loadMoreButton = document.getElementById("load-more");
-      if (sortedData.length > resultsPerPage) {
-        loadMoreButton.style.display = "block";
-      } else {
-        loadMoreButton.style.display = "none";
-      }
+      loadMoreButton.style.display =
+        sortedData.length > resultsPerPage ? "block" : "none";
 
       renderResults(sortedData.slice(0, resultsPerPage), false);
     } else {

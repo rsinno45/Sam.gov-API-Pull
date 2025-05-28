@@ -3,14 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BizMatch - Business Search Platform</title>
+    <title>Business Search</title>
     <link rel="stylesheet" href="styles.css" />
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="Sam.js"></script>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
 
     <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-auth.js"></script>
@@ -20,10 +16,7 @@
   <body>
     <div class="nav-container">
       <nav class="main-nav">
-        <a href="/" class="logo">
-          <span class="logo-text">Biz</span
-          ><span class="logo-accent">Match</span>
-        </a>
+        <a href="/" class="logo">APEX Small Business Search</a>
         <div class="auth-buttons">
           <div id="userSection" style="display: none">
             <button class="account-button" onclick="toggleUserMenu()">
@@ -46,24 +39,11 @@
       </nav>
     </div>
 
-    <div class="hero-section">
-      <h1>Find Your Perfect Business Match</h1>
-      <p class="hero-subtitle">
-        Search, discover, and connect with verified businesses across the United
-        States
-      </p>
-    </div>
-
     <div class="search-container">
       <div class="search-section">
-        <div class="search-tabs">
-          <button class="tab-button active">Quick Search</button>
-          <button class="tab-button">Advanced Filters</button>
-        </div>
-
         <div class="search-grid">
           <div class="search-group" id="business-name-group">
-            <label>Business Name</label>
+            <h3>Business Name</h3>
             <input
               type="text"
               id="business-name"
@@ -162,8 +142,8 @@
           </div>
 
           <div class="search-group" id="certifications-group">
-            <label>Business Certifications</label>
-            <div class="certification-tags">
+            <h3>Business Certifications</h3>
+            <div class="checkbox-group">
               <div class="checkbox-item">
                 <input
                   type="checkbox"
@@ -325,35 +305,29 @@
           </div>
 
           <button class="search-button" onclick="performSearch()">
-            <span class="search-icon">🔍</span>
-            Find Matches
+            Search
           </button>
         </div>
       </div>
     </div>
 
     <div class="results-container">
-      <div class="results-header">
-        <div id="total-count" class="results-count"></div>
-        <button id="download-csv" class="download-button" onclick="fetchData()">
-          Export Results
-        </button>
-      </div>
-
+      <div id="total-count" class="results-count"></div>
+      <button id="download-csv" class="download-button" onclick="fetchData()">
+        Download Results
+      </button>
       <div id="loading" class="loading">
         <div class="loading-spinner"></div>
-        <p>Finding matches...</p>
+        <p>Loading results...</p>
       </div>
-
       <div id="output" class="results-grid"></div>
-
       <button
         id="load-more"
         class="load-more"
         onclick="loadMore()"
         style="display: none"
       >
-        Show More Results
+        Load More
       </button>
     </div>
   </body>

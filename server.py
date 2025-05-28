@@ -11,7 +11,7 @@ API_KEY = "1N3Uevlh2s2CFCOcO2Da2pgSEpC5oesbzXDwEVxp"  # Example key
 # CORS configuration
 CORS(app, resources={
     r"/*": {
-        "origins": ["https://samapipull.netlify.app"],
+        "origins": ["https://samapi.netlify.app"],
         "methods": ["GET", "POST", "OPTIONS"],
         "allow_headers": ["Content-Type"]
     }
@@ -21,7 +21,7 @@ CORS(app, resources={
 @app.route('/', methods=['GET'])
 def home():
     response = make_response(jsonify({"message": "SAM.gov API Server is running!"}))
-    response.headers.add("Access-Control-Allow-Origin", "https://samapipull.netlify.app")
+    response.headers.add("Access-Control-Allow-Origin", "https://samapi.netlify.app")
     return response
 
 @app.route('/process-sam-data', methods=['POST'])

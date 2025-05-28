@@ -7,7 +7,7 @@ from dsbs_scraper import DSBSDataScraper
 app = Flask(__name__)
 
 API_KEY = "1N3Uevlh2s2CFCOcO2Da2pgSEpC5oesbzXDwEVxp"  # Example key
-
+# TODO: Add API key to environment variablex
 # CORS configuration
 CORS(app, resources={
     r"/*": {

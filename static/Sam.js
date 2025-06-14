@@ -314,7 +314,6 @@ function fetchData() {
         entity.entityURL || "",
         entity["assertions.primaryNaics"] || "",
         entity["assertions.naicsCode"] || "",
-        entity[phoneNumber] || "",
       ];
 
       csvRows.push(row);

@@ -420,10 +420,6 @@ function renderResults(results, append = false) {
             ? `${entity["governmentBusinessPOC.firstName"]} ${entity["governmentBusinessPOC.lastName"]}`
             : null,
       },
-      {
-        label: "Phone Number",
-        value: entity["phoneNumber"],
-      },
 
       {
         label: "DBA",
